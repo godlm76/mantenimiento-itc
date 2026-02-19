@@ -300,12 +300,35 @@
     window._tt = setTimeout(() => t.style.opacity = '0', 3500);
   }
 
-  function generarFolio() {
-    const fecha = new Date();
-    const year = fecha.getFullYear().toString().slice(-2);
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-    const rand = String(Math.floor(Math.random() * 9000) + 1000);
-    return `ITC-${year}${mes}-${rand}`;
+  const prefijosArea = {
+    'Aire Acondicionado': 'AAco',
+    'Eléctrico': 'Elec',
+    'Herrería': 'Herr',
+    'Infraestructura': 'IAca',
+    'Pintura': 'Pint',
+    'Plomería': 'Plom',
+    'Servicios Especializados': 'SEsp',
+    'Servicios Generales': 'SGen',
+    'Otro': 'Otro'
+  };
+
+  async function generarFolio(area) {
+    const prefijo = prefijosArea[area] || 'Otro';
+    try {
+      const res = await fetch(
+        SUPABASE_URL + '/rest/v1/solicitudes?folio=like.DME%2F' + prefijo + '%2F*&select=folio&order=folio.desc&limit=1',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const data = await res.json();
+      let consecutivo = 1;
+      if (data && data.length > 0) {
+        const ultimoNum = parseInt(data[0].folio.split('/')[2]) || 0;
+        consecutivo = ultimoNum + 1;
+      }
+      return 'DME/' + prefijo + '/' + String(consecutivo).padStart(5, '0');
+    } catch(e) {
+      return 'DME/' + prefijo + '/' + String(Math.floor(Math.random() * 9000) + 1000).padStart(5, '0');
+    }
   }
 
   // =============================================
@@ -374,7 +397,7 @@
     btn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Enviando...</span></div>';
 
     try {
-      const folio = generarFolio();
+      const folio = await generarFolio(document.getElementById('area').value);
       const fotoUrls = await subirFotos(folio);
 
       await guardarSolicitud({
