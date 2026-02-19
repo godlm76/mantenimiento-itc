@@ -689,6 +689,76 @@
 
 <script>
   const SUPABASE_URL = 'https://mtmylzxqlbwpcouogvac.supabase.co';
+  const RESEND_KEY = 're_9jiWHEEa_FSoHeHysxkkPGo5bMXCkYqKA';
+  const RESEND_KEY = 're_9jiWHEEa_FSoHeHysxkkPGo5bMXCkYqKA';
+
+  // =============================================
+  // NOTIFICACIONES POR CORREO
+  // =============================================
+  async function enviarNotificacionCorreo(solicitud) {
+    if (!solicitud.contacto || solicitud.tipo_contacto !== 'correo') return;
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <div style="background:#145e2e;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+          <h1 style="color:white;font-size:20px;margin:0">Instituto Tecnológico de Celaya</h1>
+          <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:13px">Departamento de Mantenimiento de Equipo</p>
+        </div>
+        <div style="background:white;padding:28px;border:1px solid #e0e0e0">
+          <div style="background:#e8f5ee;border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
+            <div style="font-size:40px">✅</div>
+            <h2 style="color:#145e2e;margin:8px 0 4px;font-size:18px">¡Tu solicitud fue completada!</h2>
+            <div style="font-family:monospace;font-size:20px;font-weight:bold;color:#145e2e;letter-spacing:2px">${solicitud.folio}</div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <tr style="border-bottom:1px solid #f0f0f0">
+              <td style="padding:10px;color:#666;width:40%">Área atendida</td>
+              <td style="padding:10px;font-weight:600">${solicitud.area}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0">
+              <td style="padding:10px;color:#666">Campus</td>
+              <td style="padding:10px;font-weight:600">${solicitud.campus}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0">
+              <td style="padding:10px;color:#666">Ubicación</td>
+              <td style="padding:10px;font-weight:600">${solicitud.ubicacion}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0">
+              <td style="padding:10px;color:#666">Personal que atendió</td>
+              <td style="padding:10px;font-weight:600">${solicitud.personal_asignado || 'Equipo de mantenimiento'}</td>
+            </tr>
+            <tr>
+              <td style="padding:10px;color:#666">Fecha de cierre</td>
+              <td style="padding:10px;font-weight:600">${new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'})}</td>
+            </tr>
+          </table>
+          ${solicitud.notas_internas ? `<div style="background:#f9f9f9;border-radius:8px;padding:14px;margin-top:16px"><p style="margin:0;font-size:13px;color:#666"><b>Notas del trabajo:</b><br>${solicitud.notas_internas}</p></div>` : ''}
+          <p style="font-size:13px;color:#888;margin-top:24px;text-align:center">Si tienes dudas sobre el trabajo realizado, acércate al Departamento de Mantenimiento de Equipo.</p>
+        </div>
+        <div style="background:#f5f5f5;padding:14px;border-radius:0 0 12px 12px;text-align:center">
+          <p style="font-size:11px;color:#aaa;margin:0">Instituto Tecnológico de Celaya • Departamento de Mantenimiento de Equipo</p>
+        </div>
+      </div>`;
+
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: 'Mantenimiento ITC <onboarding@resend.dev>',
+          to: [solicitud.contacto],
+          subject: `✅ Tu solicitud ${solicitud.folio} fue completada`,
+          html
+        })
+      });
+      console.log('Correo enviado a:', solicitud.contacto);
+    } catch(e) {
+      console.error('Error enviando correo:', e);
+    }
+  }
   const SUPABASE_KEY = 'sb_publishable_Mj7z1vGY8Roq5wYqTkngAw_xQ9l5WR2';
 
   const USUARIOS = { 'admin': 'itc2026', 'jefe': 'mant2026', 'subdirector': 'sub2026' };
@@ -906,6 +976,72 @@
   function cerrarModal() { document.getElementById('modal-overlay').classList.remove('show'); solicitudActual = null; }
   function cerrarModalOverlay(e) { if (e.target === document.getElementById('modal-overlay')) cerrarModal(); }
 
+  // =============================================
+  // NOTIFICACIONES POR CORREO
+  // =============================================
+  async function enviarNotificacionCorreo(solicitud) {
+    try {
+      const html = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <div style="background:#145e2e;padding:20px;border-radius:12px 12px 0 0;text-align:center">
+            <h1 style="color:white;font-size:20px;margin:0">Instituto Tecnológico de Celaya</h1>
+            <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px">Departamento de Mantenimiento de Equipo</p>
+          </div>
+          <div style="background:white;padding:28px;border:1px solid #e0e0e0;border-top:none">
+            <div style="background:#e8f5ee;border-radius:10px;padding:16px;text-align:center;margin-bottom:24px">
+              <div style="font-size:40px">✅</div>
+              <h2 style="color:#145e2e;margin:8px 0 4px;font-size:18px">¡Tu solicitud fue completada!</h2>
+              <p style="color:#5a6b5e;margin:0;font-size:13px">El equipo de mantenimiento atendió tu reporte</p>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:14px">
+              <tr><td style="padding:8px 12px;background:#f8f8f8;font-weight:bold;border-radius:6px 0 0 6px;width:40%">Folio</td>
+                <td style="padding:8px 12px;background:#f8f8f8;border-radius:0 6px 6px 0"><b style="color:#145e2e">${solicitud.folio}</b></td></tr>
+              <tr><td style="padding:8px 12px;font-weight:bold">Área atendida</td>
+                <td style="padding:8px 12px">${solicitud.area}</td></tr>
+              <tr><td style="padding:8px 12px;background:#f8f8f8;font-weight:bold;border-radius:6px 0 0 6px">Campus</td>
+                <td style="padding:8px 12px;background:#f8f8f8;border-radius:0 6px 6px 0">${solicitud.campus}</td></tr>
+              <tr><td style="padding:8px 12px;font-weight:bold">Ubicación</td>
+                <td style="padding:8px 12px">${solicitud.ubicacion}</td></tr>
+              <tr><td style="padding:8px 12px;background:#f8f8f8;font-weight:bold;border-radius:6px 0 0 6px">Descripción</td>
+                <td style="padding:8px 12px;background:#f8f8f8;border-radius:0 6px 6px 0">${solicitud.descripcion}</td></tr>
+              ${solicitud.personal_asignado ? `<tr><td style="padding:8px 12px;font-weight:bold">Atendido por</td>
+                <td style="padding:8px 12px">${solicitud.personal_asignado}</td></tr>` : ''}
+            </table>
+            <p style="font-size:12px;color:#999;margin-top:24px;text-align:center">
+              Si tienes alguna duda puedes reportar un nuevo problema en el sistema de mantenimiento del ITC.<br>
+              <b>Instituto Tecnológico de Celaya — Departamento de Mantenimiento de Equipo</b>
+            </p>
+          </div>
+        </div>`;
+
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: 'ITCelaya Mantenimiento <onboarding@resend.dev>',
+          to: [solicitud.contacto],
+          subject: 'Tu solicitud de mantenimiento fue completada ✅',
+          html
+        })
+      });
+
+      if (res.ok) {
+        console.log('Correo enviado a', solicitud.contacto);
+        return true;
+      } else {
+        const err = await res.text();
+        console.error('Error correo:', err);
+        return false;
+      }
+    } catch(e) {
+      console.error('Error enviando correo:', e);
+      return false;
+    }
+  }
+
   async function guardarCambios() {
     if (!solicitudActual) return;
     const estatus = document.getElementById('m-estatus').value;
@@ -925,7 +1061,18 @@
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify(datos)
       });
-      if (res.ok) { toast('✅ Cambios guardados'); cerrarModal(); cargarSolicitudes(); cargarDatosDash(); }
+      if (res.ok) {
+        if (estatus === 'Completado' && solicitudActual.tipo_contacto === 'correo' && solicitudActual.contacto) {
+          const solActualizada = { ...solicitudActual, ...datos };
+          const enviado = await enviarNotificacionCorreo(solActualizada);
+          toast(enviado ? '✅ Guardado — Correo enviado a ' + solicitudActual.contacto + ' 📧' : '✅ Guardado (correo no se pudo enviar)');
+        } else if (estatus === 'Completado' && solicitudActual.tipo_contacto === 'whatsapp') {
+          toast('✅ Guardado — Avisa al solicitante por WhatsApp al ' + solicitudActual.contacto + ' 📱');
+        } else {
+          toast('✅ Cambios guardados correctamente');
+        }
+        cerrarModal(); cargarSolicitudes(); cargarDatosDash();
+      }
       else { const err = await res.text(); toast('❌ Error: ' + err.substring(0,60)); }
     } catch(e) { toast('❌ Error de conexión.'); }
   }
@@ -1379,7 +1526,13 @@
         body: JSON.stringify({ estatus: nuevoEstatus, fecha_cierre: nuevoEstatus === 'Completado' ? new Date().toISOString().split('T')[0] : null })
       });
 
-      toast('✅ Avance guardado correctamente');
+      // Notificar si el trabajo se completó
+      if (document.getElementById('mr-estatus').value === 'Completado') {
+        await enviarNotificacionCorreo(reporteSolicitudActual);
+        toast('✅ Trabajo completado — Notificación enviada 📧');
+      } else {
+        toast('✅ Avance guardado correctamente');
+      }
       cerrarModalReporte();
       cargarReportes();
       cargarSolicitudes();
