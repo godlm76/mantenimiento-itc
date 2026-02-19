@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin — Mantenimiento ITC</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1a7a3c;
+    --verde-oscuro: #145e2e;
+    --verde-claro: #e8f5ee;
+    --gris: #f2f5f2;
+    --borde: #c8dece;
+    --texto: #1a2e1f;
+    --sub: #5a6b5e;
+    --error: #c0392b;
+    --amarillo: #f39c12;
+    --azul: #2980b9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Open Sans', sans-serif; background: var(--gris); min-height: 100vh; }
+
+  /* LOGIN */
+  .login-screen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
+  }
+  .login-card {
+    background: white; border-radius: 20px; padding: 40px 32px;
+    width: 100%; max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+  .login-logo {
+    width: 70px; height: 70px; background: var(--verde-oscuro);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px;
+    color: white; margin: 0 auto 20px;
+  }
+  .login-card h1 { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 800; color: var(--verde-oscuro); margin-bottom: 6px; }
+  .login-card p { font-size: 13px; color: var(--sub); margin-bottom: 28px; }
+  .login-card input {
+    width: 100%; padding: 13px 16px; border: 1.5px solid var(--borde);
+    border-radius: 10px; font-size: 14px; font-family: 'Open Sans', sans-serif;
+    color: var(--texto); margin-bottom: 12px; -webkit-appearance: none;
+  }
+  .login-card input:focus { outline: none; border-color: var(--verde); }
+  .btn-login {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
+    color: white; font-size: 15px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(26,122,60,0.35);
+  }
+  .login-error { color: var(--error); font-size: 13px; margin-top: 10px; display: none; }
+
+  /* HEADER ADMIN */
+  .header {
+    background: var(--verde-oscuro); padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 38px; height: 38px; background: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 11px;
+    color: var(--verde-oscuro); flex-shrink: 0;
+  }
+  .header h1 { color: white; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; }
+  .header p { color: rgba(255,255,255,0.7); font-size: 11px; }
+  .btn-salir {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    color: white; padding: 7px 14px; border-radius: 8px; font-size: 12px;
+    font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer;
+  }
+
+  /* STATS CARDS */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    padding: 16px; max-width: 1100px; margin: 0 auto;
+  }
+  .stat-card {
+    background: white; border-radius: 12px; padding: 14px;
+    text-align: center; border-left: 4px solid var(--borde);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+  .stat-card.pendiente { border-left-color: var(--amarillo); }
+  .stat-card.proceso { border-left-color: var(--azul); }
+  .stat-card.completado { border-left-color: var(--verde); }
+  .stat-card.total { border-left-color: var(--verde-oscuro); }
+  .stat-num { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 800; color: var(--texto); }
+  .stat-label { font-size: 11px; color: var(--sub); margin-top: 2px; font-weight: 600; }
+
+  /* FILTROS */
+  .filtros {
+    padding: 0 16px 14px; max-width: 1100px; margin: 0 auto;
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  }
+  .filtros select, .filtros input {
+    padding: 9px 12px; border: 1.5px solid var(--borde); border-radius: 9px;
+    font-size: 13px; font-family: 'Open Sans', sans-serif; color: var(--texto);
+    background: white; -webkit-appearance: none; cursor: pointer;
+  }
+  .filtros select:focus, .filtros input:focus { outline: none; border-color: var(--verde); }
+  .btn-actualizar {
+    padding: 9px 16px; background: var(--verde); border: none; border-radius: 9px;
+    color: white; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+  }
+
+  /* TABLA */
+  .tabla-wrap { padding: 0 16px; max-width: 1100px; margin: 0 auto; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  thead { background: var(--verde-oscuro); }
+  th { padding: 12px 14px; text-align: left; color: white; font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 600; white-space: nowrap; }
+  td { padding: 12px 14px; font-size: 13px; color: var(--texto); border-bottom: 1px solid #f0f4f0; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fbf8; cursor: pointer; }
+
+  .badge {
+    display: inline-block; padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif;
+  }
+  .badge-pendiente { background: #fef3cd; color: #856404; }
+  .badge-proceso { background: #cce5ff; color: #004085; }
+  .badge-completado { background: var(--verde-claro); color: var(--verde-oscuro); }
+  .badge-cancelado { background: #f8d7da; color: #721c24; }
+
+  .folio-text { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; color: var(--verde-oscuro); }
+  .loading-row td { text-align: center; padding: 40px; color: var(--sub); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 200; display: none; align-items: flex-start; justify-content: center;
+    padding: 20px; overflow-y: auto;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: white; border-radius: 16px; width: 100%; max-width: 600px;
+    margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal-header {
+    background: var(--verde-oscuro); padding: 18px 20px; border-radius: 16px 16px 0 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-header h2 { color: white; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; }
+  .btn-cerrar {
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .modal-body { padding: 20px; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .info-item { background: var(--gris); border-radius: 10px; padding: 12px; }
+  .info-item label { font-size: 10px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+  .info-item span { font-size: 13px; color: var(--texto); font-weight: 600; }
+  .info-item.full { grid-column: 1 / -1; }
+
+  .section-title {
+    font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+    color: var(--verde-oscuro); text-transform: uppercase; letter-spacing: 0.5px;
+    margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--verde-claro);
+  }
+
+  /* PERSONAL CHIPS */
+  .personal-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .personal-chip {
+    padding: 8px 14px; border: 2px solid var(--borde); border-radius: 20px;
+    font-size: 12px; font-weight: 600; color: var(--sub);
+    font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.2s;
+    background: white;
+  }
+  .personal-chip:hover { border-color: var(--verde); color: var(--verde); }
+  .personal-chip.selected {
+    border-color: var(--verde); background: var(--verde-claro);
+    color: var(--verde-oscuro);
+  }
+
+  /* CAMPOS DEL MODAL */
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label {
+    display: block; font-size: 12px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; color: var(--texto); margin-bottom: 6px;
+  }
+  .modal-field input, .modal-field select, .modal-field textarea {
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--borde);
+    border-radius: 9px; font-size: 13px; font-family: 'Open Sans', sans-serif;
+    color: var(--texto); background: white; -webkit-appearance: none;
+  }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
+    outline: none; border-color: var(--verde);
+  }
+  .modal-field textarea { height: 70px; resize: none; }
+  .modal-field .dos-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .modal-footer {
+    padding: 16px 20px; border-top: 1px solid var(--borde);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+  .btn-cancelar-modal {
+    padding: 11px 20px; border: 2px solid var(--borde); border-radius: 10px;
+    background: white; color: var(--sub); font-size: 13px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; cursor: pointer;
+  }
+  .btn-guardar {
+    padding: 11px 24px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
+    color: white; font-size: 13px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(26,122,60,0.3);
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px;
+    font-family: 'Montserrat', sans-serif; font-weight: 600; z-index: 9999;
+    opacity: 0; transition: opacity 0.3s; max-width: 88vw; text-align: center;
+    pointer-events: none; background: var(--verde-oscuro);
+  }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--sub); }
+  .empty-state .ico { font-size: 48px; margin-bottom: 12px; }
+
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+    .modal-field .dos-col { grid-template-columns: 1fr; }
+    th:nth-child(4), td:nth-child(4),
+    th:nth-child(5), td:nth-child(5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-bottom:16px;">
+      
+      <div style="width:1px;background:#ddd;height:36px;"></div>
+      
+    </div>
+    <h1>Panel de Administrador</h1>
+    <p>Departamento de Mantenimiento de Equipo</p>
+    <input type="text" id="login-user" placeholder="Usuario" autocomplete="username">
+    <input type="password" id="login-pass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesion()">
+    <button class="btn-login" onclick="iniciarSesion()">Entrar →</button>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
+  </div>
+</div>
+
+<!-- PANEL PRINCIPAL -->
+<div id="panel-principal" style="display:none">
+
+  <div class="header">
+    <div class="header-left">
+      
+      <div style="width:1px;background:rgba(255,255,255,0.3);height:34px;flex-shrink:0;"></div>
+      
+      <div>
+        <h1>Panel de Administrador</h1>
+        <p>Mantenimiento de Equipo — Instituto Tecnológico de Celaya</p>
+      </div>
+    </div>
+    <button class="btn-salir" onclick="cerrarSesion()">Salir</button>
+  </div>
+
+  <!-- ESTADÍSTICAS -->
+  <div class="stats-row">
+    <div class="stat-card total">
+      <div class="stat-num" id="stat-total">—</div>
+      <div class="stat-label">Total solicitudes</div>
+    </div>
+    <div class="stat-card pendiente">
+      <div class="stat-num" id="stat-pendiente">—</div>
+      <div class="stat-label">⏳ Pendientes</div>
+    </div>
+    <div class="stat-card proceso">
+      <div class="stat-num" id="stat-proceso">—</div>
+      <div class="stat-label">🔧 En proceso</div>
+    </div>
+    <div class="stat-card completado">
+      <div class="stat-num" id="stat-completado">—</div>
+      <div class="stat-label">✅ Completadas</div>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros">
+    <select id="filtro-estatus" onchange="cargarSolicitudes()">
+      <option value="">Todos los estatus</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="En proceso">En proceso</option>
+      <option value="Completado">Completado</option>
+      <option value="Cancelado">Cancelado</option>
+    </select>
+    <select id="filtro-area" onchange="cargarSolicitudes()">
+      <option value="">Todas las áreas</option>
+      <option>Aire Acondicionado</option>
+      <option>Eléctrico</option>
+      <option>Herrería</option>
+      <option>Infraestructura</option>
+      <option>Pintura</option>
+      <option>Plomería</option>
+      <option>Servicios Especializados</option>
+      <option>Servicios Generales</option>
+      <option>Otro</option>
+    </select>
+    <select id="filtro-campus" onchange="cargarSolicitudes()">
+      <option value="">Todos los campus</option>
+      <option>Campus I</option>
+      <option>Campus II</option>
+      <option>Extensión Apaseo el Grande</option>
+    </select>
+    <button class="btn-actualizar" onclick="cargarSolicitudes()">🔄 Actualizar</button>
+  </div>
+
+  <!-- TABLA -->
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Folio</th>
+          <th>Fecha</th>
+          <th>Área</th>
+          <th>Campus</th>
+          <th>Ubicación</th>
+          <th>Descripción</th>
+          <th>Estatus</th>
+          <th>Personal</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body">
+        <tr class="loading-row"><td colspan="8">Cargando solicitudes...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModalOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-folio">Solicitud</h2>
+      <button class="btn-cerrar" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="info-grid" id="modal-info"></div>
+
+      <div class="section-title">👷 Asignar personal</div>
+      <div class="personal-grid" id="personal-grid"></div>
+
+      <div class="section-title">📋 Gestión de la solicitud</div>
+
+      <div class="modal-field">
+        <label>Estatus</label>
+        <select id="m-estatus">
+          <option value="Pendiente">⏳ Pendiente</option>
+          <option value="En proceso">🔧 En proceso</option>
+          <option value="Completado">✅ Completado</option>
+          <option value="Cancelado">❌ Cancelado</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <div class="dos-col">
+          <div>
+            <label>Fecha de inicio</label>
+            <input type="date" id="m-fecha-inicio">
+          </div>
+          <div>
+            <label>Fecha de cierre</label>
+            <input type="date" id="m-fecha-cierre">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>Costo aproximado ($)</label>
+        <input type="number" id="m-costo" placeholder="0.00" step="0.01">
+      </div>
+
+      <div class="modal-field">
+        <label>Notas u observaciones</label>
+        <textarea id="m-notas" placeholder="Notas internas del trabajo..."></textarea>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar-modal" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarCambios()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const SUPABASE_URL = 'https://mtmylzxqlbwpcouogvac.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_Mj7z1vGY8Roq5wYqTkngAw_xQ9l5WR2';
+
+  // USUARIOS DEL SISTEMA
+  const USUARIOS = {
+    'admin': 'itc2026',
+    'jefe': 'mant2026',
+    'subdirector': 'sub2026'
+  };
+
+  // PERSONAL DEL DEPARTAMENTO
+  const PERSONAL = [
+    'CANCHE GARCÍA JOSÉ LUIS',
+    'CASTRO REYES PEDRO EMMANUEL',
+    'CERRITOS JASSO DANIEL',
+    'CERRITOS SÁNCHEZ SERGIO ARTURO',
+    'GUZMÁN MARTÍNEZ EDUARDO',
+    'GUZMÁN MARTÍNEZ JESÚS ALBERTO',
+    'LÓPEZ GODÍNEZ JOSÉ LAURO',
+    'MARTÍNEZ JUÁREZ FRANCISCO',
+    'MARTÍNEZ SALDAÑA VÍCTOR MANUEL',
+    'MOLINA GÁMEZ SERGIO',
+    'NIETO RAMÍREZ FERNANDO',
+    'NIETO RAMÍREZ FRANCISCO JAVIER',
+    'ORTEGA DE LA MORA GUILLERMO',
+    'RAMÍREZ CANCHOLA PABLO',
+    'RAMOS VALLEJO EMANUEL'
+  ];
+
+  let solicitudActual = null;
+  let personalSeleccionado = [];
+
+  // =============================================
+  // LOGIN
+  // =============================================
+  function iniciarSesion() {
+    const user = document.getElementById('login-user').value.trim().toLowerCase();
+    const pass = document.getElementById('login-pass').value;
+    if (USUARIOS[user] && USUARIOS[user] === pass) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('panel-principal').style.display = 'block';
+      sessionStorage.setItem('itc-admin', user);
+      cargarSolicitudes();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  function cerrarSesion() {
+    sessionStorage.removeItem('itc-admin');
+    document.getElementById('panel-principal').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+  }
+
+  // Verificar sesión al cargar
+  window.onload = () => {
+    if (sessionStorage.getItem('itc-admin')) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('panel-principal').style.display = 'block';
+      cargarSolicitudes();
+    }
+  };
+
+  // =============================================
+  // CARGAR SOLICITUDES
+  // =============================================
+  async function cargarSolicitudes() {
+    const estatus = document.getElementById('filtro-estatus').value;
+    const area = document.getElementById('filtro-area').value;
+    const campus = document.getElementById('filtro-campus').value;
+
+    let url = `${SUPABASE_URL}/rest/v1/solicitudes?select=*&order=fecha_creacion.desc`;
+    if (estatus) url += `&estatus=eq.${encodeURIComponent(estatus)}`;
+    if (area) url += `&area=eq.${encodeURIComponent(area)}`;
+    if (campus) url += `&campus=eq.${encodeURIComponent(campus)}`;
+
+    try {
+      const res = await fetch(url, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const data = await res.json();
+      renderTabla(data);
+      actualizarStats(data);
+    } catch(e) {
+      document.getElementById('tabla-body').innerHTML = '<tr class="loading-row"><td colspan="8">Error al cargar. Intenta de nuevo.</td></tr>';
+    }
+  }
+
+  function actualizarStats(data) {
+    // Cargar stats globales siempre
+    fetch(`${SUPABASE_URL}/rest/v1/solicitudes?select=estatus`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    }).then(r => r.json()).then(all => {
+      document.getElementById('stat-total').textContent = all.length;
+      document.getElementById('stat-pendiente').textContent = all.filter(s => s.estatus === 'Pendiente').length;
+      document.getElementById('stat-proceso').textContent = all.filter(s => s.estatus === 'En proceso').length;
+      document.getElementById('stat-completado').textContent = all.filter(s => s.estatus === 'Completado').length;
+    });
+  }
+
+  function renderTabla(data) {
+    const tbody = document.getElementById('tabla-body');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="ico">📭</div><p>No hay solicitudes con estos filtros.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(s => `
+      <tr onclick="abrirModal(${s.id})">
+        <td><span class="folio-text">${s.folio || '—'}</span></td>
+        <td>${formatFecha(s.fecha_creacion)}</td>
+        <td>${s.area || '—'}</td>
+        <td>${s.campus || '—'}</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.ubicacion || '—'}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.descripcion || '—'}</td>
+        <td><span class="badge badge-${(s.estatus || 'pendiente').toLowerCase().replace(' ','').replace('/detenido','')}">${s.estatus || 'Pendiente'}</span></td>
+        <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${s.personal_asignado || '<span style="color:#aaa">Sin asignar</span>'}</td>
+      </tr>
+    `).join('');
+  }
+
+  function formatFecha(f) {
+    if (!f) return '—';
+    const d = new Date(f);
+    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+  }
+
+  // =============================================
+  // MODAL
+  // =============================================
+  async function abrirModal(id) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${id}&select=*`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const data = await res.json();
+      if (!data || data.length === 0) return;
+      solicitudActual = data[0];
+      llenarModal(solicitudActual);
+      document.getElementById('modal-overlay').classList.add('show');
+    } catch(e) {
+      toast('Error al cargar la solicitud.');
+    }
+  }
+
+  function llenarModal(s) {
+    document.getElementById('modal-folio').textContent = s.folio || 'Solicitud';
+
+    document.getElementById('modal-info').innerHTML = `
+      <div class="info-item"><label>Solicitante</label><span>${s.nombre || 'No especificado'}</span></div>
+      <div class="info-item"><label>Contacto</label><span>${s.tipo_contacto === 'whatsapp' ? '📱' : '📧'} ${s.contacto}</span></div>
+      <div class="info-item"><label>Campus</label><span>${s.campus}</span></div>
+      <div class="info-item"><label>Área</label><span>${s.area}</span></div>
+      <div class="info-item full"><label>Ubicación</label><span>${s.ubicacion}</span></div>
+      <div class="info-item full"><label>Descripción del problema</label><span>${s.descripcion}</span></div>
+      <div class="info-item"><label>Fecha de solicitud</label><span>${formatFecha(s.fecha_creacion)}</span></div>
+      <div class="info-item"><label>Servicio</label><span>${s.servicio || s.area}</span></div>
+    `;
+
+    // Personal chips
+    personalSeleccionado = s.personal_asignado ? s.personal_asignado.split(', ') : [];
+    const grid = document.getElementById('personal-grid');
+    grid.innerHTML = PERSONAL.map(p => {
+      const nombre = p.split(' ').slice(-2).join(' '); // Mostrar solo nombre corto
+      const seleccionado = personalSeleccionado.includes(p);
+      return `<div class="personal-chip ${seleccionado ? 'selected' : ''}" 
+        onclick="togglePersonal(this, '${p}')" title="${p}">
+        👷 ${nombre}
+      </div>`;
+    }).join('');
+
+    // Campos de gestión
+    document.getElementById('m-estatus').value = s.estatus || 'Pendiente';
+    document.getElementById('m-fecha-inicio').value = s.fecha_inicio ? s.fecha_inicio.split('T')[0] : '';
+    document.getElementById('m-fecha-cierre').value = s.fecha_cierre ? s.fecha_cierre.split('T')[0] : '';
+    document.getElementById('m-costo').value = s.costo || '';
+    document.getElementById('m-notas').value = s.notas_internas || '';
+  }
+
+  function togglePersonal(chip, nombre) {
+    chip.classList.toggle('selected');
+    if (chip.classList.contains('selected')) {
+      if (!personalSeleccionado.includes(nombre)) personalSeleccionado.push(nombre);
+    } else {
+      personalSeleccionado = personalSeleccionado.filter(p => p !== nombre);
+    }
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-overlay').classList.remove('show');
+    solicitudActual = null;
+  }
+
+  function cerrarModalOverlay(e) {
+    if (e.target === document.getElementById('modal-overlay')) cerrarModal();
+  }
+
+  // =============================================
+  // GUARDAR CAMBIOS
+  // =============================================
+  async function guardarCambios() {
+    if (!solicitudActual) return;
+
+    const estatus = document.getElementById('m-estatus').value;
+    const fechaInicio = document.getElementById('m-fecha-inicio').value;
+    const fechaCierre = document.getElementById('m-fecha-cierre').value;
+    const costo = document.getElementById('m-costo').value;
+    const notas = document.getElementById('m-notas').value;
+
+    const datos = {
+      estatus,
+      personal_asignado: personalSeleccionado.join(', ') || null,
+      fecha_inicio: fechaInicio || null,
+      fecha_cierre: fechaCierre || null,
+      costo: costo ? parseFloat(costo) : null,
+      notas_internas: notas || null
+    };
+
+    if (estatus === 'En proceso' && !datos.fecha_inicio) {
+      datos.fecha_inicio = new Date().toISOString().split('T')[0];
+    }
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${solicitudActual.id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(datos)
+      });
+
+      if (res.ok) {
+        toast('✅ Cambios guardados correctamente');
+        cerrarModal();
+        cargarSolicitudes();
+      } else {
+        const errText = await res.text();
+        console.error('Error Supabase:', errText);
+        toast('❌ Error: ' + errText.substring(0, 80));
+      }
+    } catch(e) {
+      console.error('Error catch:', e);
+      toast('❌ Error de conexión. Revisa tu internet.');
+    }
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(window._tt);
+    window._tt = setTimeout(() => t.style.opacity = '0', 3000);
+  }
+</script>
+</body>
+</html>
