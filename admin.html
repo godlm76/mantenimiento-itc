@@ -1299,7 +1299,7 @@
     if(chartCampus) chartCampus.destroy();
     chartCampus = new Chart(document.getElementById('chart-campus').getContext('2d'),{
       type:'pie',
-      data:{labels,datasets:[{data:labels.map(l=>c[l]),backgroundColor:['#145e2e','#1a7a3c','#27ae60'],borderWidth:3,borderColor:'#fff'}]},
+      data:{labels,datasets:[{data:labels.map(l=>c[l]),backgroundColor:['#145e2e','#2980b9','#e67e22'],borderWidth:3,borderColor:'#fff'}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}},
         onClick:(e,el)=>{ if(el.length) mostrarDetalle('Solicitudes — '+labels[el[0].index],datos.filter(s=>s.campus===labels[el[0].index])); },
@@ -1325,7 +1325,7 @@
     const c={}; datos.forEach(s=>{if(s.costo>0&&s.campus)c[s.campus]=(c[s.campus]||0)+parseFloat(s.costo);});
     const labels=Object.keys(c).sort((a,b)=>c[b]-c[a]);
     const total=Object.values(c).reduce((a,b)=>a+b,0);
-    const colores=['#145e2e','#1a7a3c','#27ae60'];
+    const colores=['#145e2e','#2980b9','#e67e22'];
     const detalle=document.getElementById('campus-gasto-detalle');
     if(labels.length===0){
       detalle.innerHTML='<div style="color:var(--sub);font-size:13px">Sin costos registrados aún.</div>';
@@ -1536,7 +1536,7 @@
     if(rcCampus) rcCampus.destroy();
     rcCampus = new Chart(document.getElementById('rc-campus').getContext('2d'), {
       type:'pie',
-      data:{labels, datasets:[{data:labels.map(l=>c[l]), backgroundColor:['#145e2e','#1a7a3c','#27ae60'], borderWidth:3, borderColor:'#fff'}]},
+      data:{labels, datasets:[{data:labels.map(l=>c[l]), backgroundColor:['#145e2e','#2980b9','#e67e22'], borderWidth:3, borderColor:'#fff'}]},
       options:{responsive:true, maintainAspectRatio:false,
         plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}}}
     });
