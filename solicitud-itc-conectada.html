@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte Rápido — ITC Mantenimiento</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1a7a3c;
+    --verde-oscuro: #145e2e;
+    --verde-claro: #e8f5ee;
+    --gris: #f2f5f2;
+    --borde: #c8dece;
+    --texto: #1a2e1f;
+    --sub: #5a6b5e;
+    --error: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Open Sans', sans-serif; background: var(--gris); min-height: 100vh; }
+
+  .header {
+    background: var(--verde-oscuro);
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .logo {
+    width: 40px; height: 40px; background: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px;
+    color: var(--verde-oscuro); flex-shrink: 0;
+  }
+  .header h1 { color: white; font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; }
+  .header p { color: rgba(255,255,255,0.75); font-size: 11px; margin-top: 1px; }
+
+  .container { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  .intro {
+    background: white; border-radius: 14px; padding: 16px;
+    margin-bottom: 16px; border-left: 4px solid var(--verde);
+  }
+  .intro p { font-size: 13px; color: var(--sub); line-height: 1.5; }
+  .intro strong { color: var(--verde-oscuro); }
+
+  .card {
+    background: white; border-radius: 14px; padding: 20px;
+    margin-bottom: 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block; font-size: 13px; font-weight: 600;
+    font-family: 'Montserrat', sans-serif; color: var(--texto); margin-bottom: 7px;
+  }
+  label .req { color: var(--error); }
+  label .opc { font-weight: 400; color: var(--sub); font-size: 11px; }
+
+  input[type="text"], input[type="tel"], input[type="email"], select, textarea {
+    width: 100%; padding: 13px 14px; border: 1.5px solid var(--borde);
+    border-radius: 10px; font-size: 14px; font-family: 'Open Sans', sans-serif;
+    color: var(--texto); background: white; -webkit-appearance: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(26,122,60,0.1);
+  }
+  textarea { height: 80px; resize: none; }
+
+  .contacto-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+  .tab-btn {
+    flex: 1; padding: 10px; border: 2px solid var(--borde); border-radius: 10px;
+    background: white; font-size: 13px; font-weight: 600;
+    font-family: 'Montserrat', sans-serif; color: var(--sub); cursor: pointer; text-align: center;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { border-color: var(--verde); background: var(--verde-claro); color: var(--verde-oscuro); }
+
+  .areas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .area-btn {
+    padding: 12px 8px; border: 2px solid var(--borde); border-radius: 10px;
+    background: white; cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .area-btn:hover { border-color: var(--verde); }
+  .area-btn.selected { border-color: var(--verde); background: var(--verde-claro); }
+  .area-btn .ico { font-size: 24px; margin-bottom: 4px; }
+  .area-btn .nom { font-size: 11px; font-weight: 600; font-family: 'Montserrat', sans-serif; color: var(--texto); line-height: 1.3; }
+  .area-btn.selected .nom { color: var(--verde-oscuro); }
+
+  .foto-box {
+    border: 2px dashed var(--borde); border-radius: 12px; padding: 20px;
+    text-align: center; cursor: pointer; background: white; transition: all 0.2s;
+  }
+  .foto-box:hover { border-color: var(--verde); background: var(--verde-claro); }
+  .foto-box .ico { font-size: 30px; margin-bottom: 6px; }
+  .foto-box p { font-size: 13px; color: var(--sub); }
+  .foto-box input { display: none; }
+  .fotos-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .foto-thumb { width: 65px; height: 65px; border-radius: 8px; object-fit: cover; border: 2px solid var(--verde); }
+
+  .btn-enviar {
+    width: 100%; padding: 16px; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
+    color: white; font-size: 16px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(26,122,60,0.35); transition: all 0.2s; margin-top: 4px;
+  }
+  .btn-enviar:hover { transform: translateY(-1px); }
+  .btn-enviar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .loading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; }
+  .spinner {
+    width: 22px; height: 22px; border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--error); color: white; padding: 12px 20px; border-radius: 10px;
+    font-size: 13px; font-family: 'Montserrat', sans-serif; font-weight: 600;
+    z-index: 9999; opacity: 0; transition: opacity 0.3s;
+    max-width: 88vw; text-align: center; pointer-events: none;
+  }
+  #toast.ok { background: var(--verde-oscuro); }
+
+  .success { display: none; text-align: center; padding: 40px 20px; animation: fadeIn 0.4s ease; }
+  .success.show { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .success .big-icon { font-size: 72px; margin-bottom: 16px; }
+  .success h2 { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 800; color: var(--verde-oscuro); margin-bottom: 10px; }
+  .success p { font-size: 14px; color: var(--sub); line-height: 1.6; margin-bottom: 6px; }
+  .folio {
+    display: inline-block; background: var(--verde-claro); border: 2px solid var(--verde);
+    border-radius: 12px; padding: 10px 28px; font-family: 'Montserrat', sans-serif;
+    font-size: 24px; font-weight: 800; color: var(--verde-oscuro); letter-spacing: 3px; margin: 14px 0;
+  }
+  .nota-aviso {
+    background: var(--verde-claro); border-radius: 10px; padding: 14px;
+    font-size: 13px; color: var(--verde-oscuro); margin: 16px 0; text-align: left; line-height: 1.6;
+  }
+  .btn-nueva {
+    margin-top: 10px; width: 100%; padding: 14px; border: 2px solid var(--verde);
+    border-radius: 12px; background: white; color: var(--verde-oscuro);
+    font-size: 14px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">ITC</div>
+  <div>
+    <h1>Reporte de Mantenimiento</h1>
+    <p>Instituto Tecnológico de Celaya</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="form-wrap">
+    <div class="intro">
+      <p>¿Algo está dañado o necesita atención? <strong>Llena esto en menos de 1 minuto</strong> y nuestro equipo lo atenderá a la brevedad.</p>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>¿Cómo te avisamos cuando esté listo? <span class="req">*</span></label>
+        <div class="contacto-tabs">
+          <button class="tab-btn active" id="tab-cel" onclick="cambiarContacto('cel')">📱 WhatsApp</button>
+          <button class="tab-btn" id="tab-mail" onclick="cambiarContacto('mail')">📧 Correo</button>
+        </div>
+        <input type="tel" id="input-cel" placeholder="Ej: 461 123 4567">
+        <input type="email" id="input-mail" placeholder="usuario@itcelaya.edu.mx" style="display:none">
+      </div>
+      <div class="field">
+        <label>Tu nombre <span class="opc">(opcional)</span></label>
+        <input type="text" id="nombre" placeholder="¿Cómo te llamamos?">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>¿Dónde está el problema? <span class="req">*</span></label>
+        <input type="text" id="ubicacion" placeholder="Ej: Edificio F, baño planta baja">
+      </div>
+      <div class="field">
+        <label>Campus <span class="req">*</span></label>
+        <select id="campus">
+          <option value="">— Selecciona —</option>
+          <option>Campus I</option>
+          <option>Campus II</option>
+          <option>Extensión Apaseo el Grande</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>¿Qué área necesitas? <span class="req">*</span></label>
+        <div class="areas-grid">
+          <div class="area-btn" onclick="elegirArea(this,'Eléctrico')"><div class="ico">⚡</div><div class="nom">Eléctrico</div></div>
+          <div class="area-btn" onclick="elegirArea(this,'Plomería')"><div class="ico">🔧</div><div class="nom">Plomería</div></div>
+          <div class="area-btn" onclick="elegirArea(this,'Pintura')"><div class="ico">🎨</div><div class="nom">Pintura</div></div>
+          <div class="area-btn" onclick="elegirArea(this,'Infraestructura')"><div class="ico">🏗️</div><div class="nom">Infraestructura</div></div>
+          <div class="area-btn" onclick="elegirArea(this,'Aire Acondicionado')"><div class="ico">❄️</div><div class="nom">Aire Acond.</div></div>
+          <div class="area-btn" onclick="elegirArea(this,'Herrería')"><div class="ico">⚙️</div><div class="nom">Herrería</div></div>
+          <div class="area-btn" onclick="elegirArea(this,'Servicios Generales')"><div class="ico">🏢</div><div class="nom">Gral.</div></div>
+          <div class="area-btn" onclick="elegirArea(this,'Otro')"><div class="ico">❓</div><div class="nom">Otro</div></div>
+        </div>
+        <input type="hidden" id="area">
+      </div>
+      <div class="field">
+        <label>Describe el problema brevemente <span class="req">*</span></label>
+        <textarea id="descripcion" placeholder="Ej: Baño tapado, no baja el agua..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>Foto del problema <span class="opc">(opcional pero ayuda mucho)</span></label>
+        <div class="foto-box" onclick="document.getElementById('foto-input').click()">
+          <div class="ico">📷</div>
+          <p>Toca para tomar o adjuntar foto</p>
+          <input type="file" id="foto-input" accept="image/*" multiple onchange="verFotos(event)">
+        </div>
+        <div class="fotos-row" id="fotos-row"></div>
+      </div>
+    </div>
+
+    <button class="btn-enviar" id="btn-enviar" onclick="enviar()">📨 Enviar reporte</button>
+  </div>
+
+  <div class="success" id="success">
+    <div class="big-icon">✅</div>
+    <h2>¡Reporte enviado!</h2>
+    <p>Tu número de folio es:</p>
+    <div class="folio" id="folio-num">ITC-0000</div>
+    <p>Guárdalo para dar seguimiento.</p>
+    <div class="nota-aviso" id="aviso-contacto"></div>
+    <button class="btn-nueva" onclick="reiniciar()">+ Hacer otro reporte</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // =============================================
+  // CONFIGURACIÓN SUPABASE
+  // =============================================
+  const SUPABASE_URL = 'https://mtmylzxqlbwpcouogvac.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_Mj7z1vGY8Roq5wYqTkngAw_xQ9l5WR2';
+
+  // =============================================
+  // UTILIDADES
+  // =============================================
+  let modoContacto = 'cel';
+  let fotosArchivos = [];
+
+  function cambiarContacto(modo) {
+    modoContacto = modo;
+    document.getElementById('tab-cel').classList.toggle('active', modo === 'cel');
+    document.getElementById('tab-mail').classList.toggle('active', modo === 'mail');
+    document.getElementById('input-cel').style.display = modo === 'cel' ? 'block' : 'none';
+    document.getElementById('input-mail').style.display = modo === 'mail' ? 'block' : 'none';
+  }
+
+  function elegirArea(el, nombre) {
+    document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('area').value = nombre;
+  }
+
+  function verFotos(e) {
+    fotosArchivos = Array.from(e.target.files);
+    const row = document.getElementById('fotos-row');
+    row.innerHTML = '';
+    fotosArchivos.forEach(f => {
+      const r = new FileReader();
+      r.onload = ev => {
+        const img = document.createElement('img');
+        img.src = ev.target.result;
+        img.className = 'foto-thumb';
+        row.appendChild(img);
+      };
+      r.readAsDataURL(f);
+    });
+  }
+
+  function toast(msg, tipo = 'error') {
+    const t = document.getElementById('toast');
+    t.textContent = (tipo === 'error' ? '⚠️ ' : '✅ ') + msg;
+    t.className = tipo === 'ok' ? 'ok' : '';
+    t.style.opacity = '1';
+    clearTimeout(window._tt);
+    window._tt = setTimeout(() => t.style.opacity = '0', 3500);
+  }
+
+  function generarFolio() {
+    const fecha = new Date();
+    const year = fecha.getFullYear().toString().slice(-2);
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const rand = String(Math.floor(Math.random() * 9000) + 1000);
+    return `ITC-${year}${mes}-${rand}`;
+  }
+
+  // =============================================
+  // SUBIR FOTOS A SUPABASE STORAGE
+  // =============================================
+  async function subirFotos(folio) {
+    if (fotosArchivos.length === 0) return [];
+    const urls = [];
+    for (let i = 0; i < fotosArchivos.length; i++) {
+      const file = fotosArchivos[i];
+      const ext = file.name.split('.').pop();
+      const path = `solicitudes/${folio}/foto_${i + 1}.${ext}`;
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/Solicitudes-fotos/${path}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': file.type,
+          'x-upsert': 'true'
+        },
+        body: file
+      });
+      if (res.ok) {
+        urls.push(`${SUPABASE_URL}/storage/v1/object/public/Solicitudes-fotos/${path}`);
+      }
+    }
+    return urls;
+  }
+
+  // =============================================
+  // GUARDAR SOLICITUD EN SUPABASE
+  // =============================================
+  async function guardarSolicitud(datos) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(datos)
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+    return await res.json();
+  }
+
+  // =============================================
+  // ENVIAR FORMULARIO
+  // =============================================
+  async function enviar() {
+    const contacto = modoContacto === 'cel'
+      ? document.getElementById('input-cel').value.trim()
+      : document.getElementById('input-mail').value.trim();
+
+    if (!contacto) { toast(modoContacto === 'cel' ? 'Escribe tu número de WhatsApp.' : 'Escribe tu correo.'); return; }
+    if (!document.getElementById('ubicacion').value.trim()) { toast('Indica dónde está el problema.'); return; }
+    if (!document.getElementById('campus').value) { toast('Selecciona el campus.'); return; }
+    if (!document.getElementById('area').value) { toast('Selecciona el área de servicio.'); return; }
+    if (!document.getElementById('descripcion').value.trim()) { toast('Describe brevemente el problema.'); return; }
+
+    const btn = document.getElementById('btn-enviar');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Enviando...</span></div>';
+
+    try {
+      const folio = generarFolio();
+      const fotoUrls = await subirFotos(folio);
+
+      await guardarSolicitud({
+        folio,
+        nombre: document.getElementById('nombre').value.trim() || null,
+        tipo_solicitante: null,
+        departamento: null,
+        contacto,
+        tipo_contacto: modoContacto === 'cel' ? 'whatsapp' : 'correo',
+        campus: document.getElementById('campus').value,
+        ubicacion: document.getElementById('ubicacion').value.trim(),
+        area: document.getElementById('area').value,
+        servicio: document.getElementById('area').value,
+        descripcion: document.getElementById('descripcion').value.trim(),
+        fotos: fotoUrls,
+        estatus: 'Pendiente'
+      });
+
+      document.getElementById('folio-num').textContent = folio;
+      const esWA = modoContacto === 'cel';
+      document.getElementById('aviso-contacto').innerHTML = esWA
+        ? `📱 Te avisaremos por <strong>WhatsApp al ${contacto}</strong> cuando el trabajo esté completado.`
+        : `📧 Te enviaremos un correo a <strong>${contacto}</strong> cuando el trabajo esté completado.`;
+
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('success').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      console.error(err);
+      toast('Hubo un error al enviar. Intenta de nuevo.');
+      btn.disabled = false;
+      btn.innerHTML = '📨 Enviar reporte';
+    }
+  }
+
+  // =============================================
+  // REINICIAR
+  // =============================================
+  function reiniciar() {
+    document.getElementById('input-cel').value = '';
+    document.getElementById('input-mail').value = '';
+    document.getElementById('nombre').value = '';
+    document.getElementById('ubicacion').value = '';
+    document.getElementById('campus').value = '';
+    document.getElementById('area').value = '';
+    document.getElementById('descripcion').value = '';
+    document.getElementById('fotos-row').innerHTML = '';
+    fotosArchivos = [];
+    document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('selected'));
+    cambiarContacto('cel');
+    const btn = document.getElementById('btn-enviar');
+    btn.disabled = false;
+    btn.innerHTML = '📨 Enviar reporte';
+    document.getElementById('success').classList.remove('show');
+    document.getElementById('form-wrap').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
