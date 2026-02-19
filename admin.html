@@ -276,6 +276,68 @@
     pointer-events: none; background: var(--verde-oscuro);
   }
 
+  /* ===== REPORTES DIARIOS ===== */
+  .reportes-container { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
+  .dia-grupo { margin-bottom: 24px; }
+  .dia-header {
+    font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800;
+    color: var(--texto); padding: 8px 0; margin-bottom: 10px;
+    border-bottom: 2px solid var(--borde); display: flex; align-items: center; gap: 8px;
+  }
+  .reporte-card {
+    background: white; border-radius: 12px; margin-bottom: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07); overflow: hidden;
+    display: flex; cursor: pointer; transition: box-shadow 0.2s;
+    border-left: 5px solid var(--borde);
+  }
+  .reporte-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+  .reporte-card.completado { border-left-color: var(--verde); }
+  .reporte-card.en-proceso { border-left-color: var(--azul); }
+  .reporte-card.pendiente { border-left-color: var(--amarillo); }
+  .reporte-card.urgente { border-left-color: var(--error); animation: pulso 2s infinite; }
+  @keyframes pulso { 0%,100%{border-left-color:var(--error)} 50%{border-left-color:#ff6b6b} }
+  .reporte-thumb {
+    width: 70px; height: 70px; object-fit: cover; flex-shrink: 0;
+    background: var(--gris);
+  }
+  .reporte-thumb-placeholder {
+    width: 70px; height: 70px; background: var(--gris); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .reporte-info { padding: 10px 14px; flex: 1; }
+  .reporte-fecha { font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--sub); }
+  .reporte-area { font-size: 13px; font-weight: 600; color: var(--texto); margin: 2px 0; }
+  .reporte-ubicacion { font-size: 12px; color: var(--sub); }
+  .reporte-estatus-col { padding: 10px 14px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 6px; flex-shrink: 0; }
+  .icono-estatus { font-size: 20px; }
+
+  /* MODAL REPORTE */
+  .modal-reporte { max-width: 700px; }
+  .fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .foto-item { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1; }
+  .foto-item img { width: 100%; height: 100%; object-fit: cover; }
+  .foto-remove {
+    position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6);
+    color: white; border: none; border-radius: 50%; width: 22px; height: 22px;
+    font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .foto-add {
+    border: 2px dashed var(--borde); border-radius: 8px; aspect-ratio: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; background: var(--gris); font-size: 24px; color: var(--sub);
+    transition: all 0.2s;
+  }
+  .foto-add:hover { border-color: var(--verde); background: var(--verde-claro); }
+  .avances-lista { margin-bottom: 16px; }
+  .avance-item {
+    background: var(--gris); border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 8px; border-left: 3px solid var(--azul);
+  }
+  .avance-fecha { font-size: 11px; font-weight: 700; color: var(--sub); font-family: 'Montserrat', sans-serif; }
+  .avance-texto { font-size: 13px; color: var(--texto); margin-top: 4px; }
+  .avance-fotos { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .avance-foto-thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; cursor: pointer; }
+
   /* ===== BARRA DE PROGRESO ===== */
   .progress-bar {
     display: flex; align-items: center; gap: 0; width: 100%;
@@ -350,6 +412,7 @@
   <div class="tabs-bar">
     <button class="tab-btn active" onclick="cambiarTab('solicitudes', this)">📋 Solicitudes</button>
     <button class="tab-btn" onclick="cambiarTab('dashboard', this)">📊 Dashboard</button>
+    <button class="tab-btn" onclick="cambiarTab('reportes', this)">📝 Reportes</button>
   </div>
 
   <!-- ===== TAB: SOLICITUDES ===== -->
@@ -480,6 +543,101 @@
     </div>
   </div>
 
+</div>
+
+  <!-- ===== TAB: REPORTES ===== -->
+  <div class="tab-content" id="tab-reportes">
+    <div class="reportes-container">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:var(--texto)">Reportes de Actividad</h2>
+          <p style="font-size:12px;color:var(--sub);margin-top:2px">Agrupados por día — más recientes primero</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div style="display:flex;gap:6px;font-size:11px;align-items:center">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:var(--verde);border-radius:50%;display:inline-block"></span>Completado</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:var(--azul);border-radius:50%;display:inline-block"></span>En proceso</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:var(--amarillo);border-radius:50%;display:inline-block"></span>Pendiente</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:var(--error);border-radius:50%;display:inline-block"></span>+4 días sin atender</span>
+          </div>
+        </div>
+      </div>
+      <div id="reportes-lista">
+        <div style="text-align:center;padding:60px;color:var(--sub)">Cargando reportes...</div>
+      </div>
+    </div>
+  </div>
+
+<!-- ===== MODAL REPORTE DIARIO ===== -->
+<div class="modal-overlay" id="modal-reporte-overlay" onclick="cerrarModalReporteOverlay(event)">
+  <div class="modal modal-reporte">
+    <div class="modal-header">
+      <div>
+        <h2 id="mr-folio">Reporte de Trabajo</h2>
+        <div id="mr-solicitud-info" style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px"></div>
+      </div>
+      <button class="btn-cerrar" onclick="cerrarModalReporte()">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:75vh;overflow-y:auto">
+
+      <!-- INFO DE LA SOLICITUD -->
+      <div id="mr-info-solicitud" style="background:var(--gris);border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px"></div>
+
+      <!-- HISTORIAL DE AVANCES -->
+      <div id="mr-historial-wrap" style="display:none">
+        <div class="section-title">📋 Historial de avances</div>
+        <div class="avances-lista" id="mr-historial"></div>
+      </div>
+
+      <!-- NUEVO AVANCE DEL DÍA -->
+      <div class="section-title">✏️ Agregar avance del día</div>
+
+      <div class="modal-field">
+        <label>Fecha del reporte</label>
+        <input type="date" id="mr-fecha">
+      </div>
+      <div class="modal-field">
+        <label>Objetivo del trabajo</label>
+        <textarea id="mr-objetivo" placeholder="¿Qué se busca lograr con este trabajo?" style="height:60px"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Actividades realizadas hoy <span style="color:var(--error)">*</span></label>
+        <textarea id="mr-actividades" placeholder="Describe lo que se hizo hoy..." style="height:80px"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Notas o pendientes</label>
+        <textarea id="mr-notas" placeholder="Pendientes para el siguiente día..." style="height:60px"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Estatus del trabajo</label>
+        <select id="mr-estatus">
+          <option value="En proceso">🔧 En proceso — continúa mañana</option>
+          <option value="Completado">✅ Completado — trabajo terminado</option>
+          <option value="Pendiente / Detenido">⏸️ Detenido — en espera de algo</option>
+        </select>
+      </div>
+
+      <!-- FOTOS DE EVIDENCIA -->
+      <div class="section-title">📷 Fotos de evidencia (máx. 12)</div>
+      <div class="fotos-grid" id="mr-fotos-grid">
+        <div class="foto-add" onclick="document.getElementById('mr-foto-input').click()">
+          <span>📷</span>
+          <span style="font-size:11px;margin-top:4px">Agregar foto</span>
+        </div>
+      </div>
+      <input type="file" id="mr-foto-input" accept="image/*" multiple style="display:none" onchange="agregarFotos(event)">
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar-modal" onclick="cerrarModalReporte()">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarReporte()">💾 Guardar avance</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL VER FOTO ===== -->
+<div id="modal-foto" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;align-items:center;justify-content:center" onclick="this.style.display='none'">
+  <img id="modal-foto-img" style="max-width:95vw;max-height:95vh;border-radius:8px;object-fit:contain">
 </div>
 
 <!-- ===== MODAL ===== -->
@@ -979,6 +1137,283 @@
   }
 
   setInterval(()=>{ cargarSolicitudes(); cargarDatosDash(); }, 60000);
+
+  // =============================================
+  // REPORTES DIARIOS
+  // =============================================
+  let reporteSolicitudActual = null;
+  let fotosReporte = [];
+  let reportesExistentes = [];
+
+  const ICONOS_AREA = {
+    'Eléctrico':'⚡','Plomería':'🔧','Pintura':'🎨','Infraestructura':'🏗️',
+    'Aire Acondicionado':'❄️','Herrería':'⚙️','Servicios Generales':'🏢',
+    'Servicios Especializados':'🔬','Otro':'❓'
+  };
+
+  function diasSinAtender(fechaCreacion) {
+    const hoy = new Date();
+    const creacion = new Date(fechaCreacion);
+    return Math.floor((hoy - creacion) / (1000*60*60*24));
+  }
+
+  function getCardClass(solicitud) {
+    if (solicitud.estatus === 'Completado') return 'completado';
+    if (solicitud.estatus === 'En proceso') return 'en-proceso';
+    if (diasSinAtender(solicitud.fecha_creacion) > 4) return 'urgente';
+    return 'pendiente';
+  }
+
+  function getIconoEstatus(solicitud) {
+    if (solicitud.estatus === 'Completado') return '✅';
+    if (solicitud.estatus === 'En proceso') return '🦺';
+    if (diasSinAtender(solicitud.fecha_creacion) > 4) return '🚨';
+    return '🔔';
+  }
+
+  async function cargarReportes() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?select=*&order=fecha_creacion.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const solicitudes = await res.json();
+      renderReportes(solicitudes);
+    } catch(e) {
+      document.getElementById('reportes-lista').innerHTML = '<div style="text-align:center;padding:40px;color:var(--sub)">Error al cargar reportes.</div>';
+    }
+  }
+
+  function renderReportes(solicitudes) {
+    if (!solicitudes || solicitudes.length === 0) {
+      document.getElementById('reportes-lista').innerHTML = '<div style="text-align:center;padding:60px;color:var(--sub)"><div style="font-size:48px;margin-bottom:12px">📭</div><p>No hay solicitudes aún.</p></div>';
+      return;
+    }
+
+    // Agrupar por día
+    const grupos = {};
+    solicitudes.forEach(s => {
+      const fecha = s.fecha_creacion ? s.fecha_creacion.split('T')[0] : 'Sin fecha';
+      if (!grupos[fecha]) grupos[fecha] = [];
+      grupos[fecha].push(s);
+    });
+
+    const fechas = Object.keys(grupos).sort((a,b) => b.localeCompare(a));
+    let html = '';
+
+    fechas.forEach(fecha => {
+      const d = new Date(fecha + 'T12:00:00');
+      const fechaLabel = d.toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      html += `<div class="dia-grupo">
+        <div class="dia-header">📅 ${fechaLabel.charAt(0).toUpperCase() + fechaLabel.slice(1)}</div>`;
+
+      grupos[fecha].forEach(s => {
+        const cardClass = getCardClass(s);
+        const icono = getIconoEstatus(s);
+        const iconoArea = ICONOS_AREA[s.area] || '🔧';
+        const dias = diasSinAtender(s.fecha_creacion);
+        const alertaDias = (s.estatus !== 'Completado' && dias > 4) ? `<span style="font-size:10px;color:var(--error);font-weight:700">⚠️ ${dias} días sin atender</span>` : '';
+
+        html += `<div class="reporte-card ${cardClass}" onclick="abrirModalReporte(${s.id})">
+          <div class="reporte-thumb-placeholder">${iconoArea}</div>
+          <div class="reporte-info">
+            <div class="reporte-fecha">${formatFecha(s.fecha_creacion)} • ${s.folio || 'Sin folio'}</div>
+            <div class="reporte-area">${s.area || 'Sin área'}</div>
+            <div class="reporte-ubicacion">${s.ubicacion || ''}</div>
+            ${alertaDias}
+          </div>
+          <div class="reporte-estatus-col">
+            <span class="icono-estatus">${icono}</span>
+            <span class="badge badge-${s.estatus}">${s.estatus || 'Pendiente'}</span>
+          </div>
+        </div>`;
+      });
+
+      html += '</div>';
+    });
+
+    document.getElementById('reportes-lista').innerHTML = html;
+  }
+
+  async function abrirModalReporte(solicitudId) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${solicitudId}&select=*`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const data = await res.json();
+      if (!data || data.length === 0) return;
+      reporteSolicitudActual = data[0];
+      fotosReporte = [];
+
+      // Cargar reportes existentes de esta solicitud
+      const resReportes = await fetch(`${SUPABASE_URL}/rest/v1/reportes?solicitud_id=eq.${solicitudId}&select=*&order=fecha.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      reportesExistentes = await resReportes.json();
+
+      llenarModalReporte(reporteSolicitudActual, reportesExistentes);
+      document.getElementById('modal-reporte-overlay').classList.add('show');
+    } catch(e) { toast('Error al abrir reporte.'); }
+  }
+
+  function llenarModalReporte(s, reportes) {
+    document.getElementById('mr-folio').textContent = s.folio || 'Reporte de Trabajo';
+    document.getElementById('mr-solicitud-info').textContent = `${s.area} • ${s.campus} • ${s.ubicacion}`;
+
+    document.getElementById('mr-info-solicitud').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><span style="font-size:10px;color:var(--sub);font-weight:700;font-family:Montserrat,sans-serif">ÁREA</span><br><b>${s.area}</b></div>
+        <div><span style="font-size:10px;color:var(--sub);font-weight:700;font-family:Montserrat,sans-serif">CAMPUS</span><br><b>${s.campus}</b></div>
+        <div style="grid-column:1/-1"><span style="font-size:10px;color:var(--sub);font-weight:700;font-family:Montserrat,sans-serif">UBICACIÓN</span><br><b>${s.ubicacion}</b></div>
+        <div style="grid-column:1/-1"><span style="font-size:10px;color:var(--sub);font-weight:700;font-family:Montserrat,sans-serif">PROBLEMA REPORTADO</span><br>${s.descripcion}</div>
+        <div><span style="font-size:10px;color:var(--sub);font-weight:700;font-family:Montserrat,sans-serif">PERSONAL ASIGNADO</span><br>${s.personal_asignado || 'Sin asignar'}</div>
+        <div><span style="font-size:10px;color:var(--sub);font-weight:700;font-family:Montserrat,sans-serif">INICIO</span><br>${s.fecha_inicio || 'No definida'}</div>
+      </div>`;
+
+    // Historial de avances
+    const historialWrap = document.getElementById('mr-historial-wrap');
+    if (reportes && reportes.length > 0) {
+      historialWrap.style.display = 'block';
+      document.getElementById('mr-historial').innerHTML = reportes.map(r => `
+        <div class="avance-item">
+          <div class="avance-fecha">${formatFecha(r.fecha)} — <span class="badge badge-${r.estatus}">${r.estatus}</span></div>
+          ${r.objetivo ? `<div style="font-size:12px;color:var(--sub);margin-top:4px"><b>Objetivo:</b> ${r.objetivo}</div>` : ''}
+          <div class="avance-texto"><b>Actividades:</b> ${r.actividades}</div>
+          ${r.notas ? `<div class="avance-texto" style="color:var(--sub)"><b>Notas:</b> ${r.notas}</div>` : ''}
+          ${r.fotos && r.fotos.length > 0 ? `<div class="avance-fotos">${r.fotos.map(f => `<img src="${f}" class="avance-foto-thumb" onclick="verFoto('${f}')" onerror="this.style.display='none'">`).join('')}</div>` : ''}
+        </div>`).join('');
+    } else {
+      historialWrap.style.display = 'none';
+    }
+
+    // Valores por defecto
+    document.getElementById('mr-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('mr-objetivo').value = reportes && reportes.length > 0 ? (reportes[0].objetivo || '') : '';
+    document.getElementById('mr-actividades').value = '';
+    document.getElementById('mr-notas').value = '';
+    document.getElementById('mr-estatus').value = s.estatus === 'Completado' ? 'Completado' : 'En proceso';
+    renderFotosGrid();
+  }
+
+  function agregarFotos(e) {
+    const nuevas = Array.from(e.target.files);
+    nuevas.forEach(f => { if (fotosReporte.length < 12) fotosReporte.push(f); });
+    renderFotosGrid();
+    e.target.value = '';
+  }
+
+  function renderFotosGrid() {
+    const grid = document.getElementById('mr-fotos-grid');
+    let html = fotosReporte.map((f, i) => {
+      const url = URL.createObjectURL(f);
+      return `<div class="foto-item">
+        <img src="${url}" onclick="verFoto('${url}')">
+        <button class="foto-remove" onclick="quitarFoto(${i})">✕</button>
+      </div>`;
+    }).join('');
+    if (fotosReporte.length < 12) {
+      html += `<div class="foto-add" onclick="document.getElementById('mr-foto-input').click()">
+        <span>📷</span><span style="font-size:11px;margin-top:4px">Agregar</span>
+      </div>`;
+    }
+    grid.innerHTML = html;
+  }
+
+  function quitarFoto(i) { fotosReporte.splice(i, 1); renderFotosGrid(); }
+
+  function verFoto(url) {
+    document.getElementById('modal-foto-img').src = url;
+    document.getElementById('modal-foto').style.display = 'flex';
+  }
+
+  async function guardarReporte() {
+    if (!reporteSolicitudActual) return;
+    const actividades = document.getElementById('mr-actividades').value.trim();
+    if (!actividades) { toast('⚠️ Escribe las actividades realizadas.'); return; }
+
+    const btn = document.querySelector('#modal-reporte-overlay .btn-guardar');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+      // Subir fotos
+      const urlsFotos = [];
+      for (let i = 0; i < fotosReporte.length; i++) {
+        const file = fotosReporte[i];
+        const ext = file.name.split('.').pop();
+        const path = `reportes/${reporteSolicitudActual.folio}/dia_${Date.now()}_${i}.${ext}`;
+        const resF = await fetch(`${SUPABASE_URL}/storage/v1/object/Solicitudes-fotos/${path}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type, 'x-upsert': 'true' },
+          body: file
+        });
+        if (resF.ok) urlsFotos.push(`${SUPABASE_URL}/storage/v1/object/public/Solicitudes-fotos/${path}`);
+      }
+
+      // Guardar reporte
+      const nuevoReporte = {
+        solicitud_id: reporteSolicitudActual.id,
+        fecha: document.getElementById('mr-fecha').value,
+        area: reporteSolicitudActual.area,
+        ubicacion: reporteSolicitudActual.ubicacion,
+        objetivo: document.getElementById('mr-objetivo').value.trim() || null,
+        actividades,
+        notas: document.getElementById('mr-notas').value.trim() || null,
+        estatus: document.getElementById('mr-estatus').value,
+        personal: reporteSolicitudActual.personal_asignado || null,
+        fotos: urlsFotos
+      };
+
+      const resR = await fetch(`${SUPABASE_URL}/rest/v1/reportes`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(nuevoReporte)
+      });
+
+      if (!resR.ok) throw new Error(await resR.text());
+
+      // Actualizar estatus de la solicitud
+      const nuevoEstatus = document.getElementById('mr-estatus').value === 'Completado' ? 'Completado' : 'En proceso';
+      await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${reporteSolicitudActual.id}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ estatus: nuevoEstatus, fecha_cierre: nuevoEstatus === 'Completado' ? new Date().toISOString().split('T')[0] : null })
+      });
+
+      toast('✅ Avance guardado correctamente');
+      cerrarModalReporte();
+      cargarReportes();
+      cargarSolicitudes();
+
+    } catch(e) {
+      console.error(e);
+      toast('❌ Error al guardar. Intenta de nuevo.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar avance';
+    }
+  }
+
+  function cerrarModalReporte() {
+    document.getElementById('modal-reporte-overlay').classList.remove('show');
+    reporteSolicitudActual = null;
+    fotosReporte = [];
+  }
+
+  function cerrarModalReporteOverlay(e) {
+    if (e.target === document.getElementById('modal-reporte-overlay')) cerrarModalReporte();
+  }
+
+  // Cargar reportes cuando se cambia a esa pestaña
+  const _cambiarTabOriginal = cambiarTab;
+  function cambiarTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'dashboard') renderDashboard();
+    if (tab === 'reportes') cargarReportes();
+  }
+
 </script>
 </body>
 </html>
