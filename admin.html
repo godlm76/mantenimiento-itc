@@ -413,6 +413,7 @@
     <button class="tab-btn active" onclick="cambiarTab('solicitudes', this)">📋 Solicitudes</button>
     <button class="tab-btn" onclick="cambiarTab('dashboard', this)">📊 Dashboard</button>
     <button class="tab-btn" onclick="cambiarTab('reportes', this)">📝 Reportes</button>
+    <button class="tab-btn" onclick="cambiarTab('dash-reportes', this)">📈 Stats Reportes</button>
   </div>
 
   <!-- ===== TAB: SOLICITUDES ===== -->
@@ -553,6 +554,9 @@
           <h2 style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:var(--texto)">Reportes de Actividad</h2>
           <p style="font-size:12px;color:var(--sub);margin-top:2px">Agrupados por día — más recientes primero</p>
         </div>
+        <button onclick="abrirReporteLibre()" style="background:linear-gradient(135deg,#145e2e,#1e8f46);color:white;border:none;border-radius:10px;padding:10px 18px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">
+          ➕ Nuevo reporte libre
+        </button>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <div style="display:flex;gap:6px;font-size:11px;align-items:center">
             <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:var(--verde);border-radius:50%;display:inline-block"></span>Completado</span>
@@ -568,6 +572,79 @@
     </div>
   </div>
 
+  <!-- ===== TAB: DASHBOARD REPORTES ===== -->
+  <div class="tab-content" id="tab-dash-reportes">
+    <div class="dash-container">
+
+      <div class="periodo-bar">
+        <span style="font-size:13px;color:var(--sub);font-weight:600;margin-right:4px">Período:</span>
+        <button class="periodo-btn" onclick="filtrarPeriodoRep(7,this)">7 días</button>
+        <button class="periodo-btn active" onclick="filtrarPeriodoRep(30,this)">30 días</button>
+        <button class="periodo-btn" onclick="filtrarPeriodoRep(90,this)">3 meses</button>
+        <button class="periodo-btn" onclick="filtrarPeriodoRep(365,this)">1 año</button>
+        <button class="periodo-btn" onclick="filtrarPeriodoRep(9999,this)">Todo</button>
+      </div>
+
+      <!-- STATS REPORTES -->
+      <div class="stats-grid-dash" style="margin-bottom:20px">
+        <div class="stat-card-dash total"><div class="stat-icon">📋</div><div class="stat-big" id="dr-total">—</div><div class="stat-lbl">Total reportes</div></div>
+        <div class="stat-card-dash completado"><div class="stat-icon">✅</div><div class="stat-big" id="dr-completado">—</div><div class="stat-lbl">Completados</div></div>
+        <div class="stat-card-dash proceso"><div class="stat-icon">🔧</div><div class="stat-big" id="dr-proceso">—</div><div class="stat-lbl">En proceso</div></div>
+        <div class="stat-card-dash pendiente"><div class="stat-icon">⏸️</div><div class="stat-big" id="dr-detenido">—</div><div class="stat-lbl">Detenidos</div></div>
+      </div>
+
+      <!-- DETALLE AL CLICK -->
+      <div class="detalle-panel" id="detalle-rep-panel">
+        <div class="detalle-header">
+          <div class="detalle-title" id="detalle-rep-titulo">Detalle</div>
+          <button class="btn-cerrar-detalle" onclick="cerrarDetalleRep()">✕ Cerrar</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="detalle-tabla">
+            <thead><tr><th>Folio</th><th>Fecha</th><th>Área</th><th>Ubicación</th><th>Objetivo</th><th>Personal</th><th>Estatus</th></tr></thead>
+            <tbody id="detalle-rep-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">📊 Reportes por Área</div>
+          <div class="chart-sub">Haz clic para ver detalle</div>
+          <div class="chart-wrap"><canvas id="rc-area"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🎯 Reportes por Estatus</div>
+          <div class="chart-sub">Estado de los trabajos</div>
+          <div class="chart-wrap"><canvas id="rc-estatus"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title">📅 Reportes por Día</div>
+          <div class="chart-sub">Actividad del equipo en el tiempo</div>
+          <div class="chart-wrap tall"><canvas id="rc-tiempo"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🏫 Reportes por Campus</div>
+          <div class="chart-sub">Distribución por campus</div>
+          <div class="chart-wrap"><canvas id="rc-campus"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🔖 Tipo de Reporte</div>
+          <div class="chart-sub">Libre (DME/L) vs Solicitud (DME/)</div>
+          <div class="chart-wrap"><canvas id="rc-tipo"></canvas></div>
+        </div>
+      </div>
+
+      <!-- PERSONAL MÁS ACTIVO EN REPORTES -->
+      <div class="chart-card" style="margin-bottom:20px">
+        <div class="chart-title">👷 Personal más activo en reportes</div>
+        <div class="chart-sub">Trabajos realizados por persona</div>
+        <div class="personal-grid-dash" id="personal-rep-dash"></div>
+      </div>
+
+    </div>
+  </div>
+
 <!-- ===== MODAL REPORTE DIARIO ===== -->
 <div class="modal-overlay" id="modal-reporte-overlay" onclick="cerrarModalReporteOverlay(event)">
   <div class="modal modal-reporte">
@@ -580,8 +657,45 @@
     </div>
     <div class="modal-body" style="max-height:75vh;overflow-y:auto">
 
-      <!-- INFO DE LA SOLICITUD -->
+      <!-- INFO DE LA SOLICITUD (vinculado) o CAMPOS LIBRES -->
       <div id="mr-info-solicitud" style="background:var(--gris);border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px"></div>
+
+      <!-- CAMPOS PARA REPORTE LIBRE -->
+      <div id="mr-campos-libres" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div class="modal-field" style="margin:0">
+            <label>Área <span style="color:var(--error)">*</span></label>
+            <select id="mr-area-libre">
+              <option value="">Selecciona...</option>
+              <option>Aire Acondicionado</option>
+              <option>Eléctrico</option>
+              <option>Herrería</option>
+              <option>Infraestructura</option>
+              <option>Pintura</option>
+              <option>Plomería</option>
+              <option>Servicios Especializados</option>
+              <option>Servicios Generales</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="modal-field" style="margin:0">
+            <label>Campus</label>
+            <select id="mr-campus-libre">
+              <option>Campus I</option>
+              <option>Campus II</option>
+              <option>Extensión Apaseo el Grande</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label>Ubicación específica <span style="color:var(--error)">*</span></label>
+          <input type="text" id="mr-ubicacion-libre" placeholder="Ej: Baños planta baja Edificio D">
+        </div>
+        <div class="modal-field">
+          <label>Personal que realiza el trabajo</label>
+          <div class="personal-grid" id="personal-grid-libre"></div>
+        </div>
+      </div>
 
       <!-- HISTORIAL DE AVANCES -->
       <div id="mr-historial-wrap" style="display:none">
@@ -1283,14 +1397,284 @@
     window._tt=setTimeout(()=>t.style.opacity='0',3000);
   }
 
+  // =============================================
+  // DASHBOARD DE REPORTES
+  // =============================================
+  let todosLosReportes = [];
+  let diasFiltroRep = 30;
+  let rcArea, rcEstatus, rcTiempo, rcCampus, rcTipo;
+
+  async function cargarDatosReportes() {
+    try {
+      // Cargar tanto reportes de la tabla reportes como solicitudes con folio L
+      const [resRep, resSol] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/reportes?select=*&order=fecha.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        }),
+        fetch(`${SUPABASE_URL}/rest/v1/solicitudes?select=*&order=fecha_creacion.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        })
+      ]);
+      const reportes = await resRep.json();
+      const solicitudes = await resSol.json();
+
+      // Normalizar solicitudes como reportes
+      const solComoRep = solicitudes.map(s => ({
+        folio: s.folio,
+        fecha: s.fecha_creacion ? s.fecha_creacion.split('T')[0] : null,
+        area: s.area,
+        ubicacion: s.ubicacion,
+        objetivo: s.descripcion,
+        actividades: s.notas_internas || '',
+        estatus: s.estatus,
+        personal: s.personal_asignado,
+        campus: s.campus,
+        tipo: s.folio && s.folio.includes('/L') ? 'libre' : 'solicitud'
+      }));
+
+      // Normalizar reportes de tabla reportes
+      const repNorm = (Array.isArray(reportes) ? reportes : []).map(r => ({
+        folio: r.folio_libre || `REP-${r.id}`,
+        fecha: r.fecha,
+        area: r.area,
+        ubicacion: r.ubicacion,
+        objetivo: r.objetivo,
+        actividades: r.actividades,
+        estatus: r.estatus,
+        personal: r.personal,
+        campus: null,
+        tipo: r.folio_libre ? 'libre' : 'solicitud'
+      }));
+
+      todosLosReportes = [...solComoRep, ...repNorm];
+    } catch(e) {
+      console.error('Error cargando reportes:', e);
+      todosLosReportes = [];
+    }
+  }
+
+  function filtrarPorPeriodoRep(datos, dias) {
+    if (dias >= 9999) return datos;
+    const limite = new Date();
+    limite.setDate(limite.getDate() - dias);
+    return datos.filter(r => r.fecha && new Date(r.fecha) >= limite);
+  }
+
+  function filtrarPeriodoRep(dias, btn) {
+    diasFiltroRep = dias;
+    document.querySelectorAll('#tab-dash-reportes .periodo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDashReportes();
+  }
+
+  function renderDashReportes() {
+    const datos = filtrarPorPeriodoRep(todosLosReportes, diasFiltroRep);
+    const total = datos.length;
+    const comp = datos.filter(r => r.estatus === 'Completado').length;
+    const proc = datos.filter(r => r.estatus === 'En proceso').length;
+    const det = datos.filter(r => r.estatus === 'Pendiente / Detenido' || r.estatus === 'Pendiente').length;
+
+    document.getElementById('dr-total').textContent = total;
+    document.getElementById('dr-completado').textContent = comp;
+    document.getElementById('dr-proceso').textContent = proc;
+    document.getElementById('dr-detenido').textContent = det;
+
+    renderRcArea(datos); renderRcEstatus(datos); renderRcTiempo(datos);
+    renderRcCampus(datos); renderRcTipo(datos); renderPersonalRep(datos);
+  }
+
+  function renderRcArea(datos) {
+    const c = {}; datos.forEach(r => { if(r.area) c[r.area]=(c[r.area]||0)+1; });
+    const labels = Object.keys(c).sort((a,b)=>c[b]-c[a]);
+    if(rcArea) rcArea.destroy();
+    rcArea = new Chart(document.getElementById('rc-area').getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets: [{ data: labels.map(l=>c[l]), backgroundColor: labels.map(l=>COLORES_AREA[l]||'#95a5a6'), borderRadius:6, borderSkipped:false }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f0f4f0'},ticks:{stepSize:1}}},
+        onClick:(e,el)=>{ if(el.length) mostrarDetalleRep('Reportes — '+labels[el[0].index], datos.filter(r=>r.area===labels[el[0].index])); },
+        onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';}
+      }
+    });
+  }
+
+  function renderRcEstatus(datos) {
+    const c={'Completado':0,'En proceso':0,'Pendiente / Detenido':0,'Pendiente':0};
+    datos.forEach(r=>{ if(c[r.estatus]!==undefined) c[r.estatus]++; else c['Pendiente']++; });
+    const merged = {'Completado':c['Completado'],'En proceso':c['En proceso'],'Detenido/Pendiente':c['Pendiente / Detenido']+c['Pendiente']};
+    const labels = Object.keys(merged).filter(k=>merged[k]>0);
+    const cols = {'Completado':'#1a7a3c','En proceso':'#2980b9','Detenido/Pendiente':'#f39c12'};
+    if(rcEstatus) rcEstatus.destroy();
+    rcEstatus = new Chart(document.getElementById('rc-estatus').getContext('2d'), {
+      type:'doughnut',
+      data:{labels, datasets:[{data:labels.map(l=>merged[l]), backgroundColor:labels.map(l=>cols[l]), borderWidth:3, borderColor:'#fff'}]},
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}}}
+    });
+  }
+
+  function renderRcTiempo(datos) {
+    const c={}; datos.forEach(r=>{if(r.fecha)c[r.fecha]=(c[r.fecha]||0)+1;});
+    const fechas=Object.keys(c).sort();
+    if(rcTiempo) rcTiempo.destroy();
+    rcTiempo = new Chart(document.getElementById('rc-tiempo').getContext('2d'), {
+      type:'line',
+      data:{labels:fechas, datasets:[{label:'Reportes', data:fechas.map(f=>c[f]),
+        borderColor:'#2980b9', backgroundColor:'rgba(41,128,185,0.1)', fill:true,
+        tension:0.4, pointBackgroundColor:'#2980b9', pointRadius:5, pointHoverRadius:7}]},
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10},maxTicksLimit:10}},y:{grid:{color:'#f0f4f0'},ticks:{stepSize:1}}},
+        onClick:(e,el)=>{ if(el.length) mostrarDetalleRep('Reportes del '+fechas[el[0].index], datos.filter(r=>r.fecha===fechas[el[0].index])); },
+        onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';}
+      }
+    });
+  }
+
+  function renderRcCampus(datos) {
+    const c={}; datos.forEach(r=>{if(r.campus)c[r.campus]=(c[r.campus]||0)+1;});
+    const labels=Object.keys(c);
+    if(!labels.length) return;
+    if(rcCampus) rcCampus.destroy();
+    rcCampus = new Chart(document.getElementById('rc-campus').getContext('2d'), {
+      type:'pie',
+      data:{labels, datasets:[{data:labels.map(l=>c[l]), backgroundColor:['#145e2e','#1a7a3c','#27ae60'], borderWidth:3, borderColor:'#fff'}]},
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}}}
+    });
+  }
+
+  function renderRcTipo(datos) {
+    const libre = datos.filter(r=>r.tipo==='libre').length;
+    const solicitud = datos.filter(r=>r.tipo==='solicitud').length;
+    if(rcTipo) rcTipo.destroy();
+    rcTipo = new Chart(document.getElementById('rc-tipo').getContext('2d'), {
+      type:'doughnut',
+      data:{
+        labels:['🔧 Libre (DME/L...)', '📋 Por solicitud'],
+        datasets:[{data:[libre, solicitud], backgroundColor:['#2980b9','#1a7a3c'], borderWidth:3, borderColor:'#fff'}]
+      },
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}},
+          tooltip:{callbacks:{label:ctx=>` ${ctx.raw} reportes (${Math.round(ctx.raw/(libre+solicitud)*100)}%)`}}}
+      }
+    });
+  }
+
+  function renderPersonalRep(datos) {
+    const c={};
+    datos.forEach(r=>{if(r.personal)r.personal.split(', ').forEach(p=>{if(p.trim())c[p.trim()]=(c[p.trim()]||0)+1;});});
+    const sorted=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+    const container=document.getElementById('personal-rep-dash');
+    if(!sorted.length){container.innerHTML='<div style="color:var(--sub);font-size:13px;padding:10px">Sin datos de personal aún.</div>';return;}
+    container.innerHTML=sorted.map(([nombre,count])=>{
+      const nombreCorto=nombre.split(' ').slice(-2).join(' ');
+      return `<div class="personal-card"><div class="personal-count">${count}</div><div class="personal-nombre">${nombreCorto}</div><div class="personal-label">reporte${count!==1?'s':''} realizado${count!==1?'s':''}</div></div>`;
+    }).join('');
+  }
+
+  function mostrarDetalleRep(titulo, reportes) {
+    document.getElementById('detalle-rep-titulo').textContent = `${titulo} (${reportes.length})`;
+    const tbody = document.getElementById('detalle-rep-body');
+    tbody.innerHTML = reportes.map(r=>`
+      <tr>
+        <td style="font-weight:700;font-size:11px;color:var(--verde-oscuro)">${r.folio||'—'}</td>
+        <td>${r.fecha||'—'}</td>
+        <td>${r.area||'—'}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.ubicacion||'—'}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.objetivo||'—'}</td>
+        <td style="font-size:11px">${r.personal||'<span style="color:#aaa">—</span>'}</td>
+        <td><span class="badge badge-${r.estatus}">${r.estatus||'—'}</span></td>
+      </tr>`).join('');
+    const panel=document.getElementById('detalle-rep-panel');
+    panel.classList.add('show');
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function cerrarDetalleRep() { document.getElementById('detalle-rep-panel').classList.remove('show'); }
+
   setInterval(()=>{ cargarSolicitudes(); cargarDatosDash(); }, 60000);
 
   // =============================================
   // REPORTES DIARIOS
   // =============================================
   let reporteSolicitudActual = null;
+  let esReporteLibre = false;
+  let personalLibreSeleccionado = [];
   let fotosReporte = [];
   let reportesExistentes = [];
+
+  const PREFIJOS_AREA = {
+    'Eléctrico':'LElec','Plomería':'LPlom','Pintura':'LPint',
+    'Infraestructura':'LIAca','Aire Acondicionado':'LAAco',
+    'Herrería':'LHerr','Servicios Generales':'LSGen',
+    'Servicios Especializados':'LSEsp','Otro':'LOtro'
+  };
+
+  async function generarFolioLibre(area) {
+    const prefijo = PREFIJOS_AREA[area] || 'LOtro';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?folio=like.DME/${prefijo}/*&select=folio&order=folio.desc&limit=1`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const data = await res.json();
+      let siguiente = 1;
+      if (data && data.length > 0) {
+        const ultimo = data[0].folio.split('/')[2];
+        siguiente = parseInt(ultimo) + 1;
+      }
+      return `DME/${prefijo}/${String(siguiente).padStart(5,'0')}`;
+    } catch(e) {
+      return `DME/${prefijo}/${Date.now().toString().slice(-5)}`;
+    }
+  }
+
+  function abrirReporteLibre() {
+    esReporteLibre = true;
+    reporteSolicitudActual = null;
+    fotosReporte = [];
+    personalLibreSeleccionado = [];
+
+    document.getElementById('mr-folio').textContent = '🔧 Nuevo Reporte Libre';
+    document.getElementById('mr-solicitud-info').textContent = 'Trabajo de mantenimiento sin solicitud previa';
+    document.getElementById('mr-info-solicitud').innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;color:var(--verde-oscuro)">
+        <span style="font-size:24px">🔧</span>
+        <div>
+          <div style="font-weight:700;font-family:Montserrat,sans-serif;font-size:13px">Reporte de trabajo libre</div>
+          <div style="font-size:12px;color:var(--sub)">El folio se generará automáticamente con prefijo L (libre)</div>
+        </div>
+      </div>`;
+
+    // Mostrar campos libres, ocultar historial
+    document.getElementById('mr-campos-libres').style.display = 'block';
+    document.getElementById('mr-historial-wrap').style.display = 'none';
+
+    // Llenar chips de personal en reporte libre
+    document.getElementById('personal-grid-libre').innerHTML = PERSONAL.map(p => {
+      const nombre = p.split(' ').slice(-2).join(' ');
+      return `<div class="personal-chip" onclick="togglePersonalLibre(this,'${p}')" title="${p}">👷 ${nombre}</div>`;
+    }).join('');
+
+    // Valores por defecto
+    document.getElementById('mr-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('mr-objetivo').value = '';
+    document.getElementById('mr-actividades').value = '';
+    document.getElementById('mr-notas').value = '';
+    document.getElementById('mr-estatus').value = 'Completado';
+    document.getElementById('mr-area-libre').value = '';
+    renderFotosGrid();
+
+    document.getElementById('modal-reporte-overlay').classList.add('show');
+  }
+
+  function togglePersonalLibre(chip, nombre) {
+    chip.classList.toggle('selected');
+    if (chip.classList.contains('selected')) {
+      if (!personalLibreSeleccionado.includes(nombre)) personalLibreSeleccionado.push(nombre);
+    } else {
+      personalLibreSeleccionado = personalLibreSeleccionado.filter(p => p !== nombre);
+    }
+  }
 
   const ICONOS_AREA = {
     'Eléctrico':'⚡','Plomería':'🔧','Pintura':'🎨','Infraestructura':'🏗️',
@@ -1403,6 +1787,7 @@
   }
 
   function llenarModalReporte(s, reportes) {
+    document.getElementById('mr-campos-libres').style.display = 'none';
     document.getElementById('mr-folio').textContent = s.folio || 'Reporte de Trabajo';
     document.getElementById('mr-solicitud-info').textContent = `${s.area} • ${s.campus} • ${s.ubicacion}`;
 
@@ -1473,9 +1858,16 @@
   }
 
   async function guardarReporte() {
-    if (!reporteSolicitudActual) return;
     const actividades = document.getElementById('mr-actividades').value.trim();
     if (!actividades) { toast('⚠️ Escribe las actividades realizadas.'); return; }
+
+    // Validar campos de reporte libre
+    if (esReporteLibre) {
+      const area = document.getElementById('mr-area-libre').value;
+      const ubicacion = document.getElementById('mr-ubicacion-libre').value.trim();
+      if (!area) { toast('⚠️ Selecciona el área del trabajo.'); return; }
+      if (!ubicacion) { toast('⚠️ Escribe la ubicación del trabajo.'); return; }
+    } else if (!reporteSolicitudActual) return;
 
     const btn = document.querySelector('#modal-reporte-overlay .btn-guardar');
     btn.disabled = true;
@@ -1496,17 +1888,35 @@
         if (resF.ok) urlsFotos.push(`${SUPABASE_URL}/storage/v1/object/public/Solicitudes-fotos/${path}`);
       }
 
+      // Determinar datos según tipo de reporte
+      let areaReporte, ubicacionReporte, solicitudId, personalReporte, folioReporte;
+
+      if (esReporteLibre) {
+        areaReporte = document.getElementById('mr-area-libre').value;
+        ubicacionReporte = document.getElementById('mr-ubicacion-libre').value.trim();
+        solicitudId = null;
+        personalReporte = personalLibreSeleccionado.join(', ') || null;
+        folioReporte = await generarFolioLibre(areaReporte);
+      } else {
+        areaReporte = reporteSolicitudActual.area;
+        ubicacionReporte = reporteSolicitudActual.ubicacion;
+        solicitudId = reporteSolicitudActual.id;
+        personalReporte = reporteSolicitudActual.personal_asignado || null;
+        folioReporte = reporteSolicitudActual.folio;
+      }
+
       // Guardar reporte
       const nuevoReporte = {
-        solicitud_id: reporteSolicitudActual.id,
+        solicitud_id: solicitudId,
+        folio_libre: esReporteLibre ? folioReporte : null,
         fecha: document.getElementById('mr-fecha').value,
-        area: reporteSolicitudActual.area,
-        ubicacion: reporteSolicitudActual.ubicacion,
+        area: areaReporte,
+        ubicacion: ubicacionReporte,
         objetivo: document.getElementById('mr-objetivo').value.trim() || null,
         actividades,
         notas: document.getElementById('mr-notas').value.trim() || null,
         estatus: document.getElementById('mr-estatus').value,
-        personal: reporteSolicitudActual.personal_asignado || null,
+        personal: personalReporte,
         fotos: urlsFotos
       };
 
@@ -1518,21 +1928,17 @@
 
       if (!resR.ok) throw new Error(await resR.text());
 
-      // Actualizar estatus de la solicitud
-      const nuevoEstatus = document.getElementById('mr-estatus').value === 'Completado' ? 'Completado' : 'En proceso';
-      await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${reporteSolicitudActual.id}`, {
-        method: 'PATCH',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ estatus: nuevoEstatus, fecha_cierre: nuevoEstatus === 'Completado' ? new Date().toISOString().split('T')[0] : null })
-      });
-
-      // Notificar si el trabajo se completó
-      if (document.getElementById('mr-estatus').value === 'Completado') {
-        await enviarNotificacionCorreo(reporteSolicitudActual);
-        toast('✅ Trabajo completado — Notificación enviada 📧');
-      } else {
-        toast('✅ Avance guardado correctamente');
+      // Solo actualizar solicitud si es reporte vinculado
+      if (!esReporteLibre && reporteSolicitudActual) {
+        const nuevoEstatus = document.getElementById('mr-estatus').value === 'Completado' ? 'Completado' : 'En proceso';
+        await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${reporteSolicitudActual.id}`, {
+          method: 'PATCH',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ estatus: nuevoEstatus, fecha_cierre: nuevoEstatus === 'Completado' ? new Date().toISOString().split('T')[0] : null })
+        });
       }
+
+      toast(esReporteLibre ? '✅ Reporte libre guardado — ' + folioReporte : '✅ Avance guardado correctamente');
       cerrarModalReporte();
       cargarReportes();
       cargarSolicitudes();
@@ -1549,7 +1955,12 @@
   function cerrarModalReporte() {
     document.getElementById('modal-reporte-overlay').classList.remove('show');
     reporteSolicitudActual = null;
+    esReporteLibre = false;
+    personalLibreSeleccionado = [];
     fotosReporte = [];
+    document.getElementById('mr-campos-libres').style.display = 'none';
+    document.getElementById('mr-area-libre').value = '';
+    document.getElementById('mr-ubicacion-libre').value = '';
   }
 
   function cerrarModalReporteOverlay(e) {
@@ -1565,6 +1976,7 @@
     document.getElementById('tab-' + tab).classList.add('active');
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'reportes') cargarReportes();
+    if (tab === 'dash-reportes') { cargarDatosReportes().then(()=>renderDashReportes()); }
   }
 
 </script>
