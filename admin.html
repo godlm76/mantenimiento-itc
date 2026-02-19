@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Admin — Mantenimiento ITC</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
     --verde: #1a7a3c;
@@ -21,22 +22,18 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Open Sans', sans-serif; background: var(--gris); min-height: 100vh; }
 
-  /* LOGIN */
+  /* ===== LOGIN ===== */
   .login-screen {
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-    background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
   }
   .login-card {
     background: white; border-radius: 20px; padding: 40px 32px;
-    width: 100%; max-width: 380px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    text-align: center;
+    width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
   }
   .login-logo {
-    width: 70px; height: 70px; background: var(--verde-oscuro);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    width: 70px; height: 70px; background: var(--verde-oscuro); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
     font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px;
     color: white; margin: 0 auto 20px;
   }
@@ -53,16 +50,14 @@
     background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
     color: white; font-size: 15px; font-weight: 700;
     font-family: 'Montserrat', sans-serif; cursor: pointer;
-    box-shadow: 0 4px 14px rgba(26,122,60,0.35);
   }
   .login-error { color: var(--error); font-size: 13px; margin-top: 10px; display: none; }
 
-  /* HEADER ADMIN */
+  /* ===== HEADER ===== */
   .header {
     background: var(--verde-oscuro); padding: 14px 20px;
     display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
   .header-left { display: flex; align-items: center; gap: 12px; }
   .logo {
@@ -79,15 +74,30 @@
     font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer;
   }
 
-  /* STATS CARDS */
+  /* ===== TABS ===== */
+  .tabs-bar {
+    background: white; border-bottom: 2px solid var(--borde);
+    display: flex; padding: 0 16px; gap: 4px; position: sticky; top: 67px; z-index: 99;
+  }
+  .tab-btn {
+    padding: 14px 20px; border: none; background: none; cursor: pointer;
+    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--sub); border-bottom: 3px solid transparent; margin-bottom: -2px;
+    transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .tab-btn:hover { color: var(--verde); }
+  .tab-btn.active { color: var(--verde-oscuro); border-bottom-color: var(--verde-oscuro); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ===== SOLICITUDES ===== */
   .stats-row {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
     padding: 16px; max-width: 1100px; margin: 0 auto;
   }
   .stat-card {
-    background: white; border-radius: 12px; padding: 14px;
-    text-align: center; border-left: 4px solid var(--borde);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    background: white; border-radius: 12px; padding: 14px; text-align: center;
+    border-left: 4px solid var(--borde); box-shadow: 0 1px 6px rgba(0,0,0,0.06);
   }
   .stat-card.pendiente { border-left-color: var(--amarillo); }
   .stat-card.proceso { border-left-color: var(--azul); }
@@ -96,24 +106,21 @@
   .stat-num { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 800; color: var(--texto); }
   .stat-label { font-size: 11px; color: var(--sub); margin-top: 2px; font-weight: 600; }
 
-  /* FILTROS */
   .filtros {
     padding: 0 16px 14px; max-width: 1100px; margin: 0 auto;
     display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
   }
-  .filtros select, .filtros input {
+  .filtros select {
     padding: 9px 12px; border: 1.5px solid var(--borde); border-radius: 9px;
     font-size: 13px; font-family: 'Open Sans', sans-serif; color: var(--texto);
     background: white; -webkit-appearance: none; cursor: pointer;
   }
-  .filtros select:focus, .filtros input:focus { outline: none; border-color: var(--verde); }
+  .filtros select:focus { outline: none; border-color: var(--verde); }
   .btn-actualizar {
     padding: 9px 16px; background: var(--verde); border: none; border-radius: 9px;
-    color: white; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif;
-    cursor: pointer;
+    color: white; font-size: 13px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer;
   }
 
-  /* TABLA */
   .tabla-wrap { padding: 0 16px; max-width: 1100px; margin: 0 auto; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
   thead { background: var(--verde-oscuro); }
@@ -122,19 +129,15 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #f8fbf8; cursor: pointer; }
 
-  .badge {
-    display: inline-block; padding: 4px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif;
-  }
-  .badge-pendiente { background: #fef3cd; color: #856404; }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif; }
+  .badge-pendiente, .badge-Pendiente { background: #fef3cd; color: #856404; }
   .badge-proceso { background: #cce5ff; color: #004085; }
-  .badge-completado { background: var(--verde-claro); color: var(--verde-oscuro); }
-  .badge-cancelado { background: #f8d7da; color: #721c24; }
-
+  .badge-En\ proceso { background: #cce5ff; color: #004085; }
+  .badge-completado, .badge-Completado { background: var(--verde-claro); color: var(--verde-oscuro); }
+  .badge-cancelado, .badge-Cancelado { background: #f8d7da; color: #721c24; }
   .folio-text { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; color: var(--verde-oscuro); }
-  .loading-row td { text-align: center; padding: 40px; color: var(--sub); }
 
-  /* MODAL */
+  /* ===== MODAL ===== */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
     z-index: 200; display: none; align-items: flex-start; justify-content: center;
@@ -143,11 +146,9 @@
   .modal-overlay.show { display: flex; }
   .modal {
     background: white; border-radius: 16px; width: 100%; max-width: 600px;
-    margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    animation: slideUp 0.3s ease;
+    margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;
   }
   @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
   .modal-header {
     background: var(--verde-oscuro); padding: 18px 20px; border-radius: 16px 16px 0 0;
     display: flex; justify-content: space-between; align-items: center;
@@ -158,52 +159,35 @@
     width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
-
   .modal-body { padding: 20px; }
-
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
   .info-item { background: var(--gris); border-radius: 10px; padding: 12px; }
   .info-item label { font-size: 10px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
   .info-item span { font-size: 13px; color: var(--texto); font-weight: 600; }
   .info-item.full { grid-column: 1 / -1; }
-
   .section-title {
     font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
     color: var(--verde-oscuro); text-transform: uppercase; letter-spacing: 0.5px;
     margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--verde-claro);
   }
-
-  /* PERSONAL CHIPS */
   .personal-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .personal-chip {
     padding: 8px 14px; border: 2px solid var(--borde); border-radius: 20px;
     font-size: 12px; font-weight: 600; color: var(--sub);
-    font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.2s;
-    background: white;
+    font-family: 'Montserrat', sans-serif; cursor: pointer; transition: all 0.2s; background: white;
   }
   .personal-chip:hover { border-color: var(--verde); color: var(--verde); }
-  .personal-chip.selected {
-    border-color: var(--verde); background: var(--verde-claro);
-    color: var(--verde-oscuro);
-  }
-
-  /* CAMPOS DEL MODAL */
+  .personal-chip.selected { border-color: var(--verde); background: var(--verde-claro); color: var(--verde-oscuro); }
   .modal-field { margin-bottom: 14px; }
-  .modal-field label {
-    display: block; font-size: 12px; font-weight: 700;
-    font-family: 'Montserrat', sans-serif; color: var(--texto); margin-bottom: 6px;
-  }
+  .modal-field label { display: block; font-size: 12px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--texto); margin-bottom: 6px; }
   .modal-field input, .modal-field select, .modal-field textarea {
     width: 100%; padding: 11px 13px; border: 1.5px solid var(--borde);
     border-radius: 9px; font-size: 13px; font-family: 'Open Sans', sans-serif;
     color: var(--texto); background: white; -webkit-appearance: none;
   }
-  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
-    outline: none; border-color: var(--verde);
-  }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: var(--verde); }
   .modal-field textarea { height: 70px; resize: none; }
   .modal-field .dos-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
   .modal-footer {
     padding: 16px 20px; border-top: 1px solid var(--borde);
     display: flex; gap: 10px; justify-content: flex-end;
@@ -218,10 +202,72 @@
     background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
     color: white; font-size: 13px; font-weight: 700;
     font-family: 'Montserrat', sans-serif; cursor: pointer;
-    box-shadow: 0 3px 10px rgba(26,122,60,0.3);
   }
 
-  /* TOAST */
+  /* ===== DASHBOARD ===== */
+  .dash-container { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
+  .periodo-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .periodo-btn {
+    padding: 8px 16px; border: 2px solid var(--borde); border-radius: 20px;
+    background: white; font-size: 12px; font-weight: 600;
+    font-family: 'Montserrat', sans-serif; color: var(--sub); cursor: pointer; transition: all 0.2s;
+  }
+  .periodo-btn.active { border-color: var(--verde); background: var(--verde-claro); color: var(--verde-oscuro); }
+  .stats-grid-dash {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;
+  }
+  .stat-card-dash {
+    background: white; border-radius: 14px; padding: 18px 16px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07); border-top: 4px solid var(--borde);
+  }
+  .stat-card-dash.total { border-top-color: var(--verde-oscuro); }
+  .stat-card-dash.pendiente { border-top-color: var(--amarillo); }
+  .stat-card-dash.proceso { border-top-color: var(--azul); }
+  .stat-card-dash.completado { border-top-color: var(--verde); }
+  .stat-icon { font-size: 22px; margin-bottom: 6px; }
+  .stat-big { font-family: 'Montserrat', sans-serif; font-size: 34px; font-weight: 800; color: var(--texto); }
+  .stat-lbl { font-size: 12px; color: var(--sub); margin-top: 2px; font-weight: 600; }
+  .costo-card {
+    background: linear-gradient(135deg, var(--verde-oscuro), #1e8f46);
+    border-radius: 14px; padding: 20px; color: white; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+  }
+  .costo-item { text-align: center; }
+  .costo-num { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800; }
+  .costo-lbl { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  .charts-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+  }
+  .chart-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 1px 8px rgba(0,0,0,0.07); }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: var(--texto); margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: var(--sub); margin-bottom: 16px; }
+  .chart-wrap { position: relative; height: 240px; }
+  .chart-wrap.tall { height: 300px; }
+  .detalle-panel {
+    background: white; border-radius: 14px; padding: 20px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07); margin-bottom: 20px;
+    display: none; animation: fadeIn 0.3s ease;
+  }
+  .detalle-panel.show { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .detalle-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .detalle-title { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; color: var(--verde-oscuro); }
+  .btn-cerrar-detalle {
+    background: var(--gris); border: none; border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; cursor: pointer; color: var(--sub); font-weight: 600;
+  }
+  .detalle-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .detalle-tabla th { padding: 10px 12px; text-align: left; background: var(--verde-oscuro); color: white; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; }
+  .detalle-tabla td { padding: 10px 12px; border-bottom: 1px solid #f0f4f0; }
+  .detalle-tabla tr:hover td { background: var(--verde-claro); }
+  .personal-grid-dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .personal-card { background: var(--gris); border-radius: 10px; padding: 12px; border-left: 3px solid var(--verde); }
+  .personal-count { font-size: 22px; font-weight: 800; color: var(--verde-oscuro); font-family: 'Montserrat', sans-serif; }
+  .personal-nombre { font-size: 12px; font-weight: 700; color: var(--texto); font-family: 'Montserrat', sans-serif; }
+  .personal-label { font-size: 11px; color: var(--sub); }
+
+  /* ===== TOAST ===== */
   #toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px;
@@ -230,127 +276,183 @@
     pointer-events: none; background: var(--verde-oscuro);
   }
 
-  .empty-state { text-align: center; padding: 50px 20px; color: var(--sub); }
-  .empty-state .ico { font-size: 48px; margin-bottom: 12px; }
-
-  @media (max-width: 600px) {
-    .stats-row { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 700px) {
+    .stats-row, .stats-grid-dash { grid-template-columns: 1fr 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .chart-card.full { grid-column: 1; }
+    .personal-grid-dash { grid-template-columns: 1fr 1fr; }
     .info-grid { grid-template-columns: 1fr; }
     .modal-field .dos-col { grid-template-columns: 1fr; }
-    th:nth-child(4), td:nth-child(4),
-    th:nth-child(5), td:nth-child(5) { display: none; }
   }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ===== LOGIN ===== -->
 <div class="login-screen" id="login-screen">
   <div class="login-card">
-    <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-bottom:16px;">
-      
-      <div style="width:1px;background:#ddd;height:36px;"></div>
-      
-    </div>
+    <div class="login-logo">ITC</div>
     <h1>Panel de Administrador</h1>
     <p>Departamento de Mantenimiento de Equipo</p>
     <input type="text" id="login-user" placeholder="Usuario" autocomplete="username">
-    <input type="password" id="login-pass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesion()">
+    <input type="password" id="login-pass" placeholder="Contraseña" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter') iniciarSesion()">
     <button class="btn-login" onclick="iniciarSesion()">Entrar →</button>
     <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
   </div>
 </div>
 
-<!-- PANEL PRINCIPAL -->
+<!-- ===== PANEL PRINCIPAL ===== -->
 <div id="panel-principal" style="display:none">
 
   <div class="header">
     <div class="header-left">
-      
-      <div style="width:1px;background:rgba(255,255,255,0.3);height:34px;flex-shrink:0;"></div>
-      
+      <div class="logo">ITC</div>
       <div>
-        <h1>Panel de Administrador</h1>
-        <p>Mantenimiento de Equipo — Instituto Tecnológico de Celaya</p>
+        <h1>Mantenimiento de Equipo</h1>
+        <p>Instituto Tecnológico de Celaya</p>
       </div>
     </div>
     <button class="btn-salir" onclick="cerrarSesion()">Salir</button>
   </div>
 
-  <!-- ESTADÍSTICAS -->
-  <div class="stats-row">
-    <div class="stat-card total">
-      <div class="stat-num" id="stat-total">—</div>
-      <div class="stat-label">Total solicitudes</div>
+  <!-- TABS -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="cambiarTab('solicitudes', this)">📋 Solicitudes</button>
+    <button class="tab-btn" onclick="cambiarTab('dashboard', this)">📊 Dashboard</button>
+  </div>
+
+  <!-- ===== TAB: SOLICITUDES ===== -->
+  <div class="tab-content active" id="tab-solicitudes">
+    <div class="stats-row">
+      <div class="stat-card total"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total</div></div>
+      <div class="stat-card pendiente"><div class="stat-num" id="stat-pendiente">—</div><div class="stat-label">⏳ Pendientes</div></div>
+      <div class="stat-card proceso"><div class="stat-num" id="stat-proceso">—</div><div class="stat-label">🔧 En proceso</div></div>
+      <div class="stat-card completado"><div class="stat-num" id="stat-completado">—</div><div class="stat-label">✅ Completadas</div></div>
     </div>
-    <div class="stat-card pendiente">
-      <div class="stat-num" id="stat-pendiente">—</div>
-      <div class="stat-label">⏳ Pendientes</div>
+    <div class="filtros">
+      <select id="filtro-estatus" onchange="cargarSolicitudes()">
+        <option value="">Todos los estatus</option>
+        <option>Pendiente</option><option>En proceso</option>
+        <option>Completado</option><option>Cancelado</option>
+      </select>
+      <select id="filtro-area" onchange="cargarSolicitudes()">
+        <option value="">Todas las áreas</option>
+        <option>Aire Acondicionado</option><option>Eléctrico</option>
+        <option>Herrería</option><option>Infraestructura</option>
+        <option>Pintura</option><option>Plomería</option>
+        <option>Servicios Especializados</option><option>Servicios Generales</option><option>Otro</option>
+      </select>
+      <select id="filtro-campus" onchange="cargarSolicitudes()">
+        <option value="">Todos los campus</option>
+        <option>Campus I</option><option>Campus II</option>
+        <option>Extensión Apaseo el Grande</option>
+      </select>
+      <button class="btn-actualizar" onclick="cargarSolicitudes()">🔄 Actualizar</button>
     </div>
-    <div class="stat-card proceso">
-      <div class="stat-num" id="stat-proceso">—</div>
-      <div class="stat-label">🔧 En proceso</div>
-    </div>
-    <div class="stat-card completado">
-      <div class="stat-num" id="stat-completado">—</div>
-      <div class="stat-label">✅ Completadas</div>
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Folio</th><th>Fecha</th><th>Área</th><th>Campus</th>
+            <th>Ubicación</th><th>Descripción</th><th>Estatus</th><th>Personal</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body">
+          <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--sub)">Cargando...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- FILTROS -->
-  <div class="filtros">
-    <select id="filtro-estatus" onchange="cargarSolicitudes()">
-      <option value="">Todos los estatus</option>
-      <option value="Pendiente">Pendiente</option>
-      <option value="En proceso">En proceso</option>
-      <option value="Completado">Completado</option>
-      <option value="Cancelado">Cancelado</option>
-    </select>
-    <select id="filtro-area" onchange="cargarSolicitudes()">
-      <option value="">Todas las áreas</option>
-      <option>Aire Acondicionado</option>
-      <option>Eléctrico</option>
-      <option>Herrería</option>
-      <option>Infraestructura</option>
-      <option>Pintura</option>
-      <option>Plomería</option>
-      <option>Servicios Especializados</option>
-      <option>Servicios Generales</option>
-      <option>Otro</option>
-    </select>
-    <select id="filtro-campus" onchange="cargarSolicitudes()">
-      <option value="">Todos los campus</option>
-      <option>Campus I</option>
-      <option>Campus II</option>
-      <option>Extensión Apaseo el Grande</option>
-    </select>
-    <button class="btn-actualizar" onclick="cargarSolicitudes()">🔄 Actualizar</button>
-  </div>
+  <!-- ===== TAB: DASHBOARD ===== -->
+  <div class="tab-content" id="tab-dashboard">
+    <div class="dash-container">
 
-  <!-- TABLA -->
-  <div class="tabla-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Folio</th>
-          <th>Fecha</th>
-          <th>Área</th>
-          <th>Campus</th>
-          <th>Ubicación</th>
-          <th>Descripción</th>
-          <th>Estatus</th>
-          <th>Personal</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-body">
-        <tr class="loading-row"><td colspan="8">Cargando solicitudes...</td></tr>
-      </tbody>
-    </table>
+      <div class="periodo-bar">
+        <span style="font-size:13px;color:var(--sub);font-weight:600;margin-right:4px">Período:</span>
+        <button class="periodo-btn" onclick="filtrarPeriodo(7,this)">7 días</button>
+        <button class="periodo-btn active" onclick="filtrarPeriodo(30,this)">30 días</button>
+        <button class="periodo-btn" onclick="filtrarPeriodo(90,this)">3 meses</button>
+        <button class="periodo-btn" onclick="filtrarPeriodo(365,this)">1 año</button>
+        <button class="periodo-btn" onclick="filtrarPeriodo(9999,this)">Todo</button>
+      </div>
+
+      <div class="costo-card">
+        <div class="costo-item"><div class="costo-num" id="d-costo-total">$0</div><div class="costo-lbl">💰 Costo total</div></div>
+        <div class="costo-item"><div class="costo-num" id="d-costo-prom">$0</div><div class="costo-lbl">📊 Costo promedio</div></div>
+        <div class="costo-item"><div class="costo-num" id="d-area-max">—</div><div class="costo-lbl">🏆 Área mayor costo</div></div>
+        <div class="costo-item"><div class="costo-num" id="d-tiempo-prom">— días</div><div class="costo-lbl">⏱️ Tiempo promedio</div></div>
+      </div>
+
+      <div class="stats-grid-dash">
+        <div class="stat-card-dash total"><div class="stat-icon">📋</div><div class="stat-big" id="d-total">—</div><div class="stat-lbl">Total solicitudes</div></div>
+        <div class="stat-card-dash pendiente"><div class="stat-icon">⏳</div><div class="stat-big" id="d-pendiente">—</div><div class="stat-lbl">Pendientes</div></div>
+        <div class="stat-card-dash proceso"><div class="stat-icon">🔧</div><div class="stat-big" id="d-proceso">—</div><div class="stat-lbl">En proceso</div></div>
+        <div class="stat-card-dash completado"><div class="stat-icon">✅</div><div class="stat-big" id="d-completado">—</div><div class="stat-lbl">Completadas</div></div>
+      </div>
+
+      <div class="detalle-panel" id="detalle-panel">
+        <div class="detalle-header">
+          <div class="detalle-title" id="detalle-titulo">Detalle</div>
+          <button class="btn-cerrar-detalle" onclick="cerrarDetalle()">✕ Cerrar</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="detalle-tabla">
+            <thead><tr><th>Folio</th><th>Fecha</th><th>Área</th><th>Ubicación</th><th>Descripción</th><th>Personal</th><th>Estatus</th><th>Costo</th></tr></thead>
+            <tbody id="detalle-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">📊 Solicitudes por Área</div>
+          <div class="chart-sub">Haz clic en una barra para ver el detalle</div>
+          <div class="chart-wrap"><canvas id="chart-area"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🎯 Distribución por Estatus</div>
+          <div class="chart-sub">Estado actual de las solicitudes</div>
+          <div class="chart-wrap"><canvas id="chart-estatus"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title">📅 Solicitudes por Día</div>
+          <div class="chart-sub">Haz clic en un punto para ver el detalle</div>
+          <div class="chart-wrap tall"><canvas id="chart-tiempo"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🏫 Solicitudes por Campus</div>
+          <div class="chart-sub">Haz clic para ver detalle</div>
+          <div class="chart-wrap"><canvas id="chart-campus"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">💰 Costo por Área</div>
+          <div class="chart-sub">Total invertido en cada área</div>
+          <div class="chart-wrap"><canvas id="chart-costo"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <div class="chart-title">🏫 Gasto por Campus</div>
+          <div class="chart-sub">Total invertido en cada campus — haz clic para ver detalle</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center">
+            <div class="chart-wrap" style="height:220px"><canvas id="chart-gasto-campus"></canvas></div>
+            <div id="campus-gasto-detalle" style="display:flex;flex-direction:column;gap:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:20px">
+        <div class="chart-title">👷 Personal más activo</div>
+        <div class="chart-sub">Trabajos asignados por persona</div>
+        <div class="personal-grid-dash" id="personal-dash"></div>
+      </div>
+
+    </div>
   </div>
 
 </div>
 
-<!-- MODAL DETALLE -->
+<!-- ===== MODAL ===== -->
 <div class="modal-overlay" id="modal-overlay" onclick="cerrarModalOverlay(event)">
   <div class="modal">
     <div class="modal-header">
@@ -358,14 +460,10 @@
       <button class="btn-cerrar" onclick="cerrarModal()">✕</button>
     </div>
     <div class="modal-body">
-
       <div class="info-grid" id="modal-info"></div>
-
       <div class="section-title">👷 Asignar personal</div>
       <div class="personal-grid" id="personal-grid"></div>
-
       <div class="section-title">📋 Gestión de la solicitud</div>
-
       <div class="modal-field">
         <label>Estatus</label>
         <select id="m-estatus">
@@ -375,30 +473,20 @@
           <option value="Cancelado">❌ Cancelado</option>
         </select>
       </div>
-
       <div class="modal-field">
         <div class="dos-col">
-          <div>
-            <label>Fecha de inicio</label>
-            <input type="date" id="m-fecha-inicio">
-          </div>
-          <div>
-            <label>Fecha de cierre</label>
-            <input type="date" id="m-fecha-cierre">
-          </div>
+          <div><label>Fecha de inicio</label><input type="date" id="m-fecha-inicio"></div>
+          <div><label>Fecha de cierre</label><input type="date" id="m-fecha-cierre"></div>
         </div>
       </div>
-
       <div class="modal-field">
         <label>Costo aproximado ($)</label>
         <input type="number" id="m-costo" placeholder="0.00" step="0.01">
       </div>
-
       <div class="modal-field">
         <label>Notas u observaciones</label>
         <textarea id="m-notas" placeholder="Notas internas del trabajo..."></textarea>
       </div>
-
     </div>
     <div class="modal-footer">
       <button class="btn-cancelar-modal" onclick="cerrarModal()">Cancelar</button>
@@ -413,38 +501,30 @@
   const SUPABASE_URL = 'https://mtmylzxqlbwpcouogvac.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_Mj7z1vGY8Roq5wYqTkngAw_xQ9l5WR2';
 
-  // USUARIOS DEL SISTEMA
-  const USUARIOS = {
-    'admin': 'itc2026',
-    'jefe': 'mant2026',
-    'subdirector': 'sub2026'
-  };
+  const USUARIOS = { 'admin': 'itc2026', 'jefe': 'mant2026', 'subdirector': 'sub2026' };
 
-  // PERSONAL DEL DEPARTAMENTO
   const PERSONAL = [
-    'CANCHE GARCÍA JOSÉ LUIS',
-    'CASTRO REYES PEDRO EMMANUEL',
-    'CERRITOS JASSO DANIEL',
-    'CERRITOS SÁNCHEZ SERGIO ARTURO',
-    'GUZMÁN MARTÍNEZ EDUARDO',
-    'GUZMÁN MARTÍNEZ JESÚS ALBERTO',
-    'LÓPEZ GODÍNEZ JOSÉ LAURO',
-    'MARTÍNEZ JUÁREZ FRANCISCO',
-    'MARTÍNEZ SALDAÑA VÍCTOR MANUEL',
-    'MOLINA GÁMEZ SERGIO',
-    'NIETO RAMÍREZ FERNANDO',
-    'NIETO RAMÍREZ FRANCISCO JAVIER',
-    'ORTEGA DE LA MORA GUILLERMO',
-    'RAMÍREZ CANCHOLA PABLO',
-    'RAMOS VALLEJO EMANUEL'
+    'CANCHE GARCÍA JOSÉ LUIS','CASTRO REYES PEDRO EMMANUEL','CERRITOS JASSO DANIEL',
+    'CERRITOS SÁNCHEZ SERGIO ARTURO','GUZMÁN MARTÍNEZ EDUARDO','GUZMÁN MARTÍNEZ JESÚS ALBERTO',
+    'LÓPEZ GODÍNEZ JOSÉ LAURO','MARTÍNEZ JUÁREZ FRANCISCO','MARTÍNEZ SALDAÑA VÍCTOR MANUEL',
+    'MOLINA GÁMEZ SERGIO','NIETO RAMÍREZ FERNANDO','NIETO RAMÍREZ FRANCISCO JAVIER',
+    'ORTEGA DE LA MORA GUILLERMO','RAMÍREZ CANCHOLA PABLO','RAMOS VALLEJO EMANUEL'
   ];
+
+  const COLORES_AREA = {
+    'Eléctrico':'#f39c12','Plomería':'#2980b9','Pintura':'#8e44ad',
+    'Infraestructura':'#e67e22','Aire Acondicionado':'#16a085',
+    'Herrería':'#7f8c8d','Servicios Generales':'#27ae60',
+    'Servicios Especializados':'#c0392b','Otro':'#95a5a6'
+  };
 
   let solicitudActual = null;
   let personalSeleccionado = [];
+  let todosLosDatos = [];
+  let diasFiltro = 30;
+  let chartArea, chartEstatus, chartTiempo, chartCampus, chartCosto, chartGastoCampus;
 
-  // =============================================
-  // LOGIN
-  // =============================================
+  // ===== LOGIN =====
   function iniciarSesion() {
     const user = document.getElementById('login-user').value.trim().toLowerCase();
     const pass = document.getElementById('login-pass').value;
@@ -453,6 +533,7 @@
       document.getElementById('panel-principal').style.display = 'block';
       sessionStorage.setItem('itc-admin', user);
       cargarSolicitudes();
+      cargarDatosDash();
     } else {
       document.getElementById('login-error').style.display = 'block';
     }
@@ -466,42 +547,44 @@
     document.getElementById('login-pass').value = '';
   }
 
-  // Verificar sesión al cargar
   window.onload = () => {
     if (sessionStorage.getItem('itc-admin')) {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('panel-principal').style.display = 'block';
       cargarSolicitudes();
+      cargarDatosDash();
     }
   };
 
-  // =============================================
-  // CARGAR SOLICITUDES
-  // =============================================
+  // ===== TABS =====
+  function cambiarTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'dashboard') renderDashboard();
+  }
+
+  // ===== SOLICITUDES =====
   async function cargarSolicitudes() {
     const estatus = document.getElementById('filtro-estatus').value;
     const area = document.getElementById('filtro-area').value;
     const campus = document.getElementById('filtro-campus').value;
-
     let url = `${SUPABASE_URL}/rest/v1/solicitudes?select=*&order=fecha_creacion.desc`;
     if (estatus) url += `&estatus=eq.${encodeURIComponent(estatus)}`;
     if (area) url += `&area=eq.${encodeURIComponent(area)}`;
     if (campus) url += `&campus=eq.${encodeURIComponent(campus)}`;
-
     try {
-      const res = await fetch(url, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
+      const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
       const data = await res.json();
       renderTabla(data);
-      actualizarStats(data);
+      actualizarStatsHeader(data);
     } catch(e) {
-      document.getElementById('tabla-body').innerHTML = '<tr class="loading-row"><td colspan="8">Error al cargar. Intenta de nuevo.</td></tr>';
+      document.getElementById('tabla-body').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--sub)">Error al cargar.</td></tr>';
     }
   }
 
-  function actualizarStats(data) {
-    // Cargar stats globales siempre
+  function actualizarStatsHeader(data) {
     fetch(`${SUPABASE_URL}/rest/v1/solicitudes?select=estatus`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     }).then(r => r.json()).then(all => {
@@ -515,21 +598,20 @@
   function renderTabla(data) {
     const tbody = document.getElementById('tabla-body');
     if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="ico">📭</div><p>No hay solicitudes con estos filtros.</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--sub)">No hay solicitudes con estos filtros.</td></tr>';
       return;
     }
     tbody.innerHTML = data.map(s => `
       <tr onclick="abrirModal(${s.id})">
-        <td><span class="folio-text">${s.folio || '—'}</span></td>
+        <td><span class="folio-text">${s.folio||'—'}</span></td>
         <td>${formatFecha(s.fecha_creacion)}</td>
-        <td>${s.area || '—'}</td>
-        <td>${s.campus || '—'}</td>
-        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.ubicacion || '—'}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.descripcion || '—'}</td>
-        <td><span class="badge badge-${(s.estatus || 'pendiente').toLowerCase().replace(' ','').replace('/detenido','')}">${s.estatus || 'Pendiente'}</span></td>
-        <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis">${s.personal_asignado || '<span style="color:#aaa">Sin asignar</span>'}</td>
-      </tr>
-    `).join('');
+        <td>${s.area||'—'}</td>
+        <td>${s.campus||'—'}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.ubicacion||'—'}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.descripcion||'—'}</td>
+        <td><span class="badge badge-${(s.estatus||'Pendiente').replace(' ','\ ')}">${s.estatus||'Pendiente'}</span></td>
+        <td style="font-size:11px">${s.personal_asignado||'<span style="color:#aaa">Sin asignar</span>'}</td>
+      </tr>`).join('');
   }
 
   function formatFecha(f) {
@@ -538,9 +620,7 @@
     return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
   }
 
-  // =============================================
-  // MODAL
-  // =============================================
+  // ===== MODAL =====
   async function abrirModal(id) {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${id}&select=*`, {
@@ -551,38 +631,26 @@
       solicitudActual = data[0];
       llenarModal(solicitudActual);
       document.getElementById('modal-overlay').classList.add('show');
-    } catch(e) {
-      toast('Error al cargar la solicitud.');
-    }
+    } catch(e) { toast('Error al cargar la solicitud.'); }
   }
 
   function llenarModal(s) {
     document.getElementById('modal-folio').textContent = s.folio || 'Solicitud';
-
     document.getElementById('modal-info').innerHTML = `
-      <div class="info-item"><label>Solicitante</label><span>${s.nombre || 'No especificado'}</span></div>
-      <div class="info-item"><label>Contacto</label><span>${s.tipo_contacto === 'whatsapp' ? '📱' : '📧'} ${s.contacto}</span></div>
+      <div class="info-item"><label>Solicitante</label><span>${s.nombre||'No especificado'}</span></div>
+      <div class="info-item"><label>Contacto</label><span>${s.tipo_contacto==='whatsapp'?'📱':'📧'} ${s.contacto}</span></div>
       <div class="info-item"><label>Campus</label><span>${s.campus}</span></div>
       <div class="info-item"><label>Área</label><span>${s.area}</span></div>
       <div class="info-item full"><label>Ubicación</label><span>${s.ubicacion}</span></div>
-      <div class="info-item full"><label>Descripción del problema</label><span>${s.descripcion}</span></div>
-      <div class="info-item"><label>Fecha de solicitud</label><span>${formatFecha(s.fecha_creacion)}</span></div>
-      <div class="info-item"><label>Servicio</label><span>${s.servicio || s.area}</span></div>
-    `;
-
-    // Personal chips
+      <div class="info-item full"><label>Descripción</label><span>${s.descripcion}</span></div>
+      <div class="info-item"><label>Fecha solicitud</label><span>${formatFecha(s.fecha_creacion)}</span></div>
+      <div class="info-item"><label>Servicio</label><span>${s.servicio||s.area}</span></div>`;
     personalSeleccionado = s.personal_asignado ? s.personal_asignado.split(', ') : [];
-    const grid = document.getElementById('personal-grid');
-    grid.innerHTML = PERSONAL.map(p => {
-      const nombre = p.split(' ').slice(-2).join(' '); // Mostrar solo nombre corto
-      const seleccionado = personalSeleccionado.includes(p);
-      return `<div class="personal-chip ${seleccionado ? 'selected' : ''}" 
-        onclick="togglePersonal(this, '${p}')" title="${p}">
-        👷 ${nombre}
-      </div>`;
+    document.getElementById('personal-grid').innerHTML = PERSONAL.map(p => {
+      const nombre = p.split(' ').slice(-2).join(' ');
+      return `<div class="personal-chip ${personalSeleccionado.includes(p)?'selected':''}"
+        onclick="togglePersonal(this,'${p}')" title="${p}">👷 ${nombre}</div>`;
     }).join('');
-
-    // Campos de gestión
     document.getElementById('m-estatus').value = s.estatus || 'Pendiente';
     document.getElementById('m-fecha-inicio').value = s.fecha_inicio ? s.fecha_inicio.split('T')[0] : '';
     document.getElementById('m-fecha-cierre').value = s.fecha_cierre ? s.fecha_cierre.split('T')[0] : '';
@@ -592,81 +660,244 @@
 
   function togglePersonal(chip, nombre) {
     chip.classList.toggle('selected');
-    if (chip.classList.contains('selected')) {
-      if (!personalSeleccionado.includes(nombre)) personalSeleccionado.push(nombre);
-    } else {
-      personalSeleccionado = personalSeleccionado.filter(p => p !== nombre);
-    }
+    if (chip.classList.contains('selected')) { if (!personalSeleccionado.includes(nombre)) personalSeleccionado.push(nombre); }
+    else { personalSeleccionado = personalSeleccionado.filter(p => p !== nombre); }
   }
 
-  function cerrarModal() {
-    document.getElementById('modal-overlay').classList.remove('show');
-    solicitudActual = null;
-  }
+  function cerrarModal() { document.getElementById('modal-overlay').classList.remove('show'); solicitudActual = null; }
+  function cerrarModalOverlay(e) { if (e.target === document.getElementById('modal-overlay')) cerrarModal(); }
 
-  function cerrarModalOverlay(e) {
-    if (e.target === document.getElementById('modal-overlay')) cerrarModal();
-  }
-
-  // =============================================
-  // GUARDAR CAMBIOS
-  // =============================================
   async function guardarCambios() {
     if (!solicitudActual) return;
-
     const estatus = document.getElementById('m-estatus').value;
     const fechaInicio = document.getElementById('m-fecha-inicio').value;
     const fechaCierre = document.getElementById('m-fecha-cierre').value;
     const costo = document.getElementById('m-costo').value;
     const notas = document.getElementById('m-notas').value;
-
     const datos = {
-      estatus,
-      personal_asignado: personalSeleccionado.join(', ') || null,
-      fecha_inicio: fechaInicio || null,
-      fecha_cierre: fechaCierre || null,
-      costo: costo ? parseFloat(costo) : null,
-      notas_internas: notas || null
+      estatus, personal_asignado: personalSeleccionado.join(', ') || null,
+      fecha_inicio: fechaInicio || null, fecha_cierre: fechaCierre || null,
+      costo: costo ? parseFloat(costo) : null, notas_internas: notas || null
     };
-
-    if (estatus === 'En proceso' && !datos.fecha_inicio) {
-      datos.fecha_inicio = new Date().toISOString().split('T')[0];
-    }
-
+    if (estatus === 'En proceso' && !datos.fecha_inicio) datos.fecha_inicio = new Date().toISOString().split('T')[0];
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?id=eq.${solicitudActual.id}`, {
         method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify(datos)
       });
-
-      if (res.ok) {
-        toast('✅ Cambios guardados correctamente');
-        cerrarModal();
-        cargarSolicitudes();
-      } else {
-        const errText = await res.text();
-        console.error('Error Supabase:', errText);
-        toast('❌ Error: ' + errText.substring(0, 80));
-      }
-    } catch(e) {
-      console.error('Error catch:', e);
-      toast('❌ Error de conexión. Revisa tu internet.');
-    }
+      if (res.ok) { toast('✅ Cambios guardados'); cerrarModal(); cargarSolicitudes(); cargarDatosDash(); }
+      else { const err = await res.text(); toast('❌ Error: ' + err.substring(0,60)); }
+    } catch(e) { toast('❌ Error de conexión.'); }
   }
+
+  // ===== DASHBOARD =====
+  async function cargarDatosDash() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes?select=*&order=fecha_creacion.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      todosLosDatos = await res.json();
+    } catch(e) { console.error(e); }
+  }
+
+  function filtrarPorPeriodo(datos, dias) {
+    if (dias >= 9999) return datos;
+    const limite = new Date();
+    limite.setDate(limite.getDate() - dias);
+    return datos.filter(s => new Date(s.fecha_creacion) >= limite);
+  }
+
+  function filtrarPeriodo(dias, btn) {
+    diasFiltro = dias;
+    document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDashboard();
+  }
+
+  function renderDashboard() {
+    const datos = filtrarPorPeriodo(todosLosDatos, diasFiltro);
+    const total = datos.length;
+    const pend = datos.filter(s => s.estatus === 'Pendiente').length;
+    const proc = datos.filter(s => s.estatus === 'En proceso').length;
+    const comp = datos.filter(s => s.estatus === 'Completado').length;
+    document.getElementById('d-total').textContent = total;
+    document.getElementById('d-pendiente').textContent = pend;
+    document.getElementById('d-proceso').textContent = proc;
+    document.getElementById('d-completado').textContent = comp;
+
+    const conCosto = datos.filter(s => s.costo > 0);
+    const totalCosto = conCosto.reduce((a,s) => a + parseFloat(s.costo||0), 0);
+    const promCosto = conCosto.length ? totalCosto/conCosto.length : 0;
+    const costoPorArea = {};
+    datos.forEach(s => { if (s.costo>0) costoPorArea[s.area]=(costoPorArea[s.area]||0)+parseFloat(s.costo); });
+    const maxArea = Object.entries(costoPorArea).sort((a,b)=>b[1]-a[1])[0];
+    const completados = datos.filter(s => s.estatus==='Completado'&&s.fecha_inicio&&s.fecha_cierre);
+    let tiempoProm = '—';
+    if (completados.length > 0) {
+      const td = completados.reduce((a,s)=>a+(new Date(s.fecha_cierre)-new Date(s.fecha_inicio))/(86400000),0);
+      tiempoProm = Math.round(td/completados.length)+' días';
+    }
+    document.getElementById('d-costo-total').textContent = '$'+totalCosto.toLocaleString('es-MX',{minimumFractionDigits:0});
+    document.getElementById('d-costo-prom').textContent = '$'+promCosto.toLocaleString('es-MX',{minimumFractionDigits:0});
+    document.getElementById('d-area-max').textContent = maxArea ? maxArea[0] : '—';
+    document.getElementById('d-tiempo-prom').textContent = tiempoProm;
+
+    renderChartArea(datos); renderChartEstatus(datos); renderChartTiempo(datos);
+    renderChartCampus(datos); renderChartCosto(datos); renderGastoCampus(datos); renderPersonal(datos);
+  }
+
+  function renderChartArea(datos) {
+    const c = {}; datos.forEach(s => { c[s.area]=(c[s.area]||0)+1; });
+    const labels = Object.keys(c).sort((a,b)=>c[b]-c[a]);
+    if (chartArea) chartArea.destroy();
+    chartArea = new Chart(document.getElementById('chart-area').getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets: [{ data: labels.map(l=>c[l]), backgroundColor: labels.map(l=>COLORES_AREA[l]||'#95a5a6'), borderRadius: 6, borderSkipped: false }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f0f4f0'},ticks:{stepSize:1}}},
+        onClick:(e,el)=>{ if(el.length) mostrarDetalle('Solicitudes — '+labels[el[0].index], datos.filter(s=>s.area===labels[el[0].index])); },
+        onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';}
+      }
+    });
+  }
+
+  function renderChartEstatus(datos) {
+    const c={'Pendiente':0,'En proceso':0,'Completado':0,'Cancelado':0};
+    datos.forEach(s=>{if(c[s.estatus]!==undefined)c[s.estatus]++;});
+    const labels=Object.keys(c).filter(k=>c[k]>0);
+    const cols={'Pendiente':'#f39c12','En proceso':'#2980b9','Completado':'#1a7a3c','Cancelado':'#c0392b'};
+    if(chartEstatus) chartEstatus.destroy();
+    chartEstatus = new Chart(document.getElementById('chart-estatus').getContext('2d'),{
+      type:'doughnut',
+      data:{labels,datasets:[{data:labels.map(l=>c[l]),backgroundColor:labels.map(l=>cols[l]),borderWidth:3,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}},
+        onClick:(e,el)=>{ if(el.length) mostrarDetalle('Solicitudes — '+labels[el[0].index],datos.filter(s=>s.estatus===labels[el[0].index])); },
+        onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';}
+      }
+    });
+  }
+
+  function renderChartTiempo(datos) {
+    const c={}; datos.forEach(s=>{const f=s.fecha_creacion?s.fecha_creacion.split('T')[0]:null;if(f)c[f]=(c[f]||0)+1;});
+    const fechas=Object.keys(c).sort();
+    if(chartTiempo) chartTiempo.destroy();
+    chartTiempo = new Chart(document.getElementById('chart-tiempo').getContext('2d'),{
+      type:'line',
+      data:{labels:fechas,datasets:[{label:'Solicitudes',data:fechas.map(f=>c[f]),borderColor:'#1a7a3c',backgroundColor:'rgba(26,122,60,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#1a7a3c',pointRadius:5,pointHoverRadius:7}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10},maxTicksLimit:10}},y:{grid:{color:'#f0f4f0'},ticks:{stepSize:1}}},
+        onClick:(e,el)=>{ if(el.length) mostrarDetalle('Solicitudes del '+fechas[el[0].index],datos.filter(s=>s.fecha_creacion&&s.fecha_creacion.startsWith(fechas[el[0].index]))); },
+        onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';}
+      }
+    });
+  }
+
+  function renderChartCampus(datos) {
+    const c={}; datos.forEach(s=>{if(s.campus)c[s.campus]=(c[s.campus]||0)+1;});
+    const labels=Object.keys(c);
+    if(chartCampus) chartCampus.destroy();
+    chartCampus = new Chart(document.getElementById('chart-campus').getContext('2d'),{
+      type:'pie',
+      data:{labels,datasets:[{data:labels.map(l=>c[l]),backgroundColor:['#145e2e','#1a7a3c','#27ae60'],borderWidth:3,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}},
+        onClick:(e,el)=>{ if(el.length) mostrarDetalle('Solicitudes — '+labels[el[0].index],datos.filter(s=>s.campus===labels[el[0].index])); },
+        onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';}
+      }
+    });
+  }
+
+  function renderChartCosto(datos) {
+    const c={}; datos.forEach(s=>{if(s.costo>0&&s.area)c[s.area]=(c[s.area]||0)+parseFloat(s.costo);});
+    const labels=Object.keys(c).sort((a,b)=>c[b]-c[a]);
+    if(chartCosto) chartCosto.destroy();
+    chartCosto = new Chart(document.getElementById('chart-costo').getContext('2d'),{
+      type:'bar',
+      data:{labels,datasets:[{data:labels.map(l=>c[l]),backgroundColor:labels.map(l=>COLORES_AREA[l]||'#95a5a6'),borderRadius:6,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.raw.toLocaleString('es-MX')}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f0f4f0'},ticks:{callback:v=>'$'+v.toLocaleString('es-MX')}}}
+      }
+    });
+  }
+
+  function renderGastoCampus(datos) {
+    const c={}; datos.forEach(s=>{if(s.costo>0&&s.campus)c[s.campus]=(c[s.campus]||0)+parseFloat(s.costo);});
+    const labels=Object.keys(c).sort((a,b)=>c[b]-c[a]);
+    const total=Object.values(c).reduce((a,b)=>a+b,0);
+    const colores=['#145e2e','#1a7a3c','#27ae60'];
+    const detalle=document.getElementById('campus-gasto-detalle');
+    if(labels.length===0){
+      detalle.innerHTML='<div style="color:var(--sub);font-size:13px">Sin costos registrados aún.</div>';
+      if(chartGastoCampus){chartGastoCampus.destroy();chartGastoCampus=null;}
+      return;
+    }
+    detalle.innerHTML=labels.map((campus,i)=>{
+      const pct=total?Math.round(c[campus]/total*100):0;
+      return `<div style="background:var(--gris);border-radius:10px;padding:14px;border-left:4px solid ${colores[i]||'#1a7a3c'}">
+        <div style="font-size:11px;color:var(--sub);font-weight:600;margin-bottom:2px">${campus}</div>
+        <div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:var(--texto)">$${c[campus].toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:4px">${pct}% del gasto total</div>
+        <div style="margin-top:8px;background:#ddd;border-radius:4px;height:6px">
+          <div style="background:${colores[i]||'#1a7a3c'};width:${pct}%;height:6px;border-radius:4px"></div>
+        </div>
+      </div>`;
+    }).join('');
+    if(chartGastoCampus) chartGastoCampus.destroy();
+    chartGastoCampus = new Chart(document.getElementById('chart-gasto-campus').getContext('2d'),{
+      type:'doughnut',
+      data:{labels,datasets:[{data:labels.map(l=>c[l]),backgroundColor:colores.slice(0,labels.length),borderWidth:3,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}},tooltip:{callbacks:{label:ctx=>` $${ctx.raw.toLocaleString('es-MX')} (${Math.round(ctx.raw/total*100)}%)`}}},
+        onClick:(e,el)=>{ if(el.length) mostrarDetalle('Gasto — '+labels[el[0].index],datos.filter(s=>s.campus===labels[el[0].index]&&s.costo>0)); },
+        onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';}
+      }
+    });
+  }
+
+  function renderPersonal(datos) {
+    const c={};
+    datos.forEach(s=>{if(s.personal_asignado)s.personal_asignado.split(', ').forEach(p=>{if(p.trim())c[p.trim()]=(c[p.trim()]||0)+1;});});
+    const sorted=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+    const container=document.getElementById('personal-dash');
+    if(sorted.length===0){container.innerHTML='<div style="color:var(--sub);font-size:13px;padding:10px">Aún no hay personal asignado.</div>';return;}
+    container.innerHTML=sorted.map(([nombre,count])=>{
+      const nombreCorto=nombre.split(' ').slice(-2).join(' ');
+      return `<div class="personal-card"><div class="personal-count">${count}</div><div class="personal-nombre">${nombreCorto}</div><div class="personal-label">trabajo${count!==1?'s':''} asignado${count!==1?'s':''}</div></div>`;
+    }).join('');
+  }
+
+  function mostrarDetalle(titulo, solicitudes) {
+    document.getElementById('detalle-titulo').textContent = `${titulo} (${solicitudes.length})`;
+    const tbody = document.getElementById('detalle-body');
+    if(!solicitudes.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--sub)">Sin solicitudes</td></tr>';}
+    else{tbody.innerHTML=solicitudes.map(s=>`
+      <tr>
+        <td style="font-weight:700;font-size:11px;color:var(--verde-oscuro)">${s.folio||'—'}</td>
+        <td>${s.fecha_creacion?s.fecha_creacion.split('T')[0]:'—'}</td>
+        <td>${s.area||'—'}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.ubicacion||'—'}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.descripcion||'—'}</td>
+        <td style="font-size:11px">${s.personal_asignado||'<span style="color:#aaa">Sin asignar</span>'}</td>
+        <td><span class="badge badge-${s.estatus}">${s.estatus||'Pendiente'}</span></td>
+        <td>${s.costo?'$'+parseFloat(s.costo).toLocaleString('es-MX'):'—'}</td>
+      </tr>`).join('');}
+    const panel=document.getElementById('detalle-panel');
+    panel.classList.add('show');
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function cerrarDetalle() { document.getElementById('detalle-panel').classList.remove('show'); }
 
   function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.opacity = '1';
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.style.opacity='1';
     clearTimeout(window._tt);
-    window._tt = setTimeout(() => t.style.opacity = '0', 3000);
+    window._tt=setTimeout(()=>t.style.opacity='0',3000);
   }
+
+  setInterval(()=>{ cargarSolicitudes(); cargarDatosDash(); }, 60000);
 </script>
 </body>
 </html>
