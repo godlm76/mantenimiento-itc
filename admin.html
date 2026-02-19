@@ -276,6 +276,36 @@
     pointer-events: none; background: var(--verde-oscuro);
   }
 
+  /* ===== BARRA DE PROGRESO ===== */
+  .progress-bar {
+    display: flex; align-items: center; gap: 0; width: 100%;
+  }
+  .progress-step {
+    display: flex; align-items: center; gap: 4px; font-size: 10px;
+    font-family: 'Montserrat', sans-serif; font-weight: 600; color: #aaa; flex: 1;
+  }
+  .progress-step:last-child { flex: 0; }
+  .progress-dot {
+    width: 12px; height: 12px; border-radius: 50%; background: #ddd;
+    flex-shrink: 0; border: 2px solid #ddd; transition: all 0.3s;
+  }
+  .progress-line {
+    flex: 1; height: 3px; background: #ddd; transition: all 0.3s;
+  }
+  .progress-step.done .progress-dot { background: var(--verde); border-color: var(--verde); }
+  .progress-step.done .progress-line { background: var(--verde); }
+  .progress-step.done { color: var(--verde-oscuro); }
+  .progress-step.active .progress-dot { background: white; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(26,122,60,0.2); }
+  .progress-step.active { color: var(--verde-oscuro); }
+  .progress-step.cancelado .progress-dot { background: var(--error); border-color: var(--error); }
+
+  /* Barra mini en tabla */
+  .mini-progress { display: flex; gap: 3px; align-items: center; }
+  .mini-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; }
+  .mini-dot.done { background: var(--verde); }
+  .mini-dot.active { background: var(--amarillo); }
+  .mini-dot.cancelado { background: var(--error); }
+
   @media (max-width: 700px) {
     .stats-row, .stats-grid-dash { grid-template-columns: 1fr 1fr; }
     .charts-grid { grid-template-columns: 1fr; }
@@ -461,6 +491,8 @@
     </div>
     <div class="modal-body">
       <div class="info-grid" id="modal-info"></div>
+      <div class="section-title">📈 Estado de la solicitud</div>
+      <div id="modal-progreso" style="margin-bottom:16px"></div>
       <div class="section-title">👷 Asignar personal</div>
       <div class="personal-grid" id="personal-grid"></div>
       <div class="section-title">📋 Gestión de la solicitud</div>
@@ -609,9 +641,57 @@
         <td>${s.campus||'—'}</td>
         <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.ubicacion||'—'}</td>
         <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.descripcion||'—'}</td>
-        <td><span class="badge badge-${(s.estatus||'Pendiente').replace(' ','\ ')}">${s.estatus||'Pendiente'}</span></td>
+        <td>
+          <span class="badge badge-${(s.estatus||'Pendiente').replace(' ','\ ')}">${s.estatus||'Pendiente'}</span>
+          <div style="margin-top:4px">${miniProgreso(s.estatus, s.personal_asignado)}</div>
+        </td>
         <td style="font-size:11px">${s.personal_asignado||'<span style="color:#aaa">Sin asignar</span>'}</td>
       </tr>`).join('');
+  }
+
+  // ===== BARRA DE PROGRESO =====
+  function getProgresoInfo(estatus, personalAsignado) {
+    // Pasos: Recibida(0) -> Asignada(1) -> En proceso(2) -> Completada(3)
+    if (estatus === 'Cancelado') return { paso: -1, label: 'Cancelado' };
+    if (estatus === 'Completado') return { paso: 3 };
+    if (estatus === 'En proceso') return { paso: 2 };
+    if (personalAsignado) return { paso: 1 };
+    return { paso: 0 };
+  }
+
+  function miniProgreso(estatus, personalAsignado) {
+    const { paso } = getProgresoInfo(estatus, personalAsignado);
+    if (paso === -1) return '<div class="mini-progress">' + [0,1,2,3].map(i => '<div class="mini-dot cancelado"></div>').join('') + '</div>';
+    return '<div class="mini-progress">' + [0,1,2,3].map(i => {
+      const cls = i < paso ? 'done' : i === paso ? 'active' : '';
+      return `<div class="mini-dot ${cls}"></div>`;
+    }).join('') + '</div>';
+  }
+
+  function barraProgreso(estatus, personalAsignado) {
+    const pasos = ['Recibida', 'Asignada', 'En proceso', 'Completada'];
+    const { paso } = getProgresoInfo(estatus, personalAsignado);
+    if (paso === -1) {
+      return `<div style="text-align:center;padding:12px;background:#fdf2f2;border-radius:8px;color:var(--error);font-weight:700;font-size:13px">❌ Solicitud Cancelada</div>`;
+    }
+    let html = '<div class="progress-bar">';
+    pasos.forEach((p, i) => {
+      const done = i < paso;
+      const active = i === paso;
+      const cls = done ? 'done' : active ? 'active' : '';
+      html += `<div class="progress-step ${cls}">
+        <div class="progress-dot"></div>
+        <span style="white-space:nowrap">${p}</span>
+        ${i < pasos.length - 1 ? '<div class="progress-line"></div>' : ''}
+      </div>`;
+    });
+    html += '</div>';
+    const pct = Math.round((paso / 3) * 100);
+    html += `<div style="margin-top:10px;background:#eee;border-radius:6px;height:8px;overflow:hidden">
+      <div style="background:var(--verde);width:${pct}%;height:8px;border-radius:6px;transition:width 0.5s"></div>
+    </div>
+    <div style="text-align:right;font-size:11px;color:var(--sub);margin-top:4px;font-weight:600">${pct}% completado</div>`;
+    return html;
   }
 
   function formatFecha(f) {
@@ -636,6 +716,7 @@
 
   function llenarModal(s) {
     document.getElementById('modal-folio').textContent = s.folio || 'Solicitud';
+    document.getElementById('modal-progreso').innerHTML = barraProgreso(s.estatus, s.personal_asignado);
     document.getElementById('modal-info').innerHTML = `
       <div class="info-item"><label>Solicitante</label><span>${s.nombre||'No especificado'}</span></div>
       <div class="info-item"><label>Contacto</label><span>${s.tipo_contacto==='whatsapp'?'📱':'📧'} ${s.contacto}</span></div>
