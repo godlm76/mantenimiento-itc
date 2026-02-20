@@ -448,7 +448,7 @@
       <table>
         <thead>
           <tr>
-            <th>Folio</th><th>Fecha</th><th>Área</th><th>Campus</th>
+            <th style="width:40px">#</th><th>Folio</th><th>Fecha</th><th>Área</th><th>Campus</th>
             <th>Ubicación</th><th>Descripción</th><th>Estatus</th><th>Personal</th>
           </tr>
         </thead>
@@ -493,7 +493,7 @@
         </div>
         <div style="overflow-x:auto">
           <table class="detalle-tabla">
-            <thead><tr><th>Folio</th><th>Fecha</th><th>Área</th><th>Ubicación</th><th>Descripción</th><th>Personal</th><th>Estatus</th><th>Costo</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>Folio</th><th>Fecha</th><th>Área</th><th>Ubicación</th><th>Descripción</th><th>Personal</th><th>Estatus</th><th>Costo</th></tr></thead>
             <tbody id="detalle-body"></tbody>
           </table>
         </div>
@@ -601,7 +601,7 @@
         </div>
         <div style="overflow-x:auto">
           <table class="detalle-tabla">
-            <thead><tr><th>Folio</th><th>Fecha</th><th>Área</th><th>Ubicación</th><th>Objetivo</th><th>Personal</th><th>Estatus</th></tr></thead>
+            <thead><tr><th style="width:40px">#</th><th>Folio</th><th>Fecha</th><th>Área</th><th>Ubicación</th><th>Objetivo</th><th>Personal</th><th>Estatus</th></tr></thead>
             <tbody id="detalle-rep-body"></tbody>
           </table>
         </div>
@@ -976,6 +976,7 @@
     }
     tbody.innerHTML = data.map(s => `
       <tr onclick="abrirModal(${s.id})">
+        <td style="text-align:center;font-weight:700;color:var(--sub);font-size:12px">${num}</td>
         <td><span class="folio-text">${s.folio||'—'}</span></td>
         <td>${formatFecha(s.fecha_creacion)}</td>
         <td>${s.area||'—'}</td>
@@ -1721,7 +1722,8 @@
 
     // Agrupar por día
     const grupos = {};
-    solicitudes.forEach(s => {
+    solicitudes.forEach((s, i) => {
+      const num = i + 1;
       const fecha = s.fecha_creacion ? s.fecha_creacion.split('T')[0] : 'Sin fecha';
       if (!grupos[fecha]) grupos[fecha] = [];
       grupos[fecha].push(s);
