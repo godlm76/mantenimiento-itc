@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportar Falla — ITC Mantenimiento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde: #145e2e;
+      --verde-claro: #1e8f46;
+      --verde-suave: #e8f5ee;
+      --whatsapp: #25D366;
+      --whatsapp-dark: #128C7E;
+      --texto: #1a2e1f;
+      --sub: #5a7a62;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: #f0f4f1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Fondo decorativo */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -40%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(20,94,46,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -30%;
+      left: -15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(30,143,70,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 36px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(20,94,46,0.12), 0 2px 8px rgba(0,0,0,0.06);
+      animation: subir 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes subir {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .logos img {
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .divider-logo {
+      width: 1px;
+      height: 40px;
+      background: #dde8e0;
+    }
+
+    .titulo {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .titulo h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--verde);
+      line-height: 1.2;
+    }
+
+    .titulo p {
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .separador {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--verde), transparent);
+      margin: 20px 0;
+      opacity: 0.3;
+    }
+
+    .pregunta {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--texto);
+      margin-bottom: 20px;
+    }
+
+    .opciones {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .opcion {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      transition: transform 0.18s, box-shadow 0.18s;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+
+    .opcion:active { transform: scale(0.97); }
+
+    .opcion-wa {
+      background: linear-gradient(135deg, var(--whatsapp-dark), var(--whatsapp));
+      color: white;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.35);
+    }
+
+    .opcion-wa:hover {
+      box-shadow: 0 6px 28px rgba(37,211,102,0.5);
+      transform: translateY(-2px);
+    }
+
+    .opcion-web {
+      background: linear-gradient(135deg, var(--verde), var(--verde-claro));
+      color: white;
+      box-shadow: 0 4px 20px rgba(20,94,46,0.3);
+    }
+
+    .opcion-web:hover {
+      box-shadow: 0 6px 28px rgba(20,94,46,0.45);
+      transform: translateY(-2px);
+    }
+
+    .opcion-icono {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .opcion-texto {
+      text-align: left;
+    }
+
+    .opcion-texto span {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      opacity: 0.85;
+      font-family: 'Open Sans', sans-serif;
+      margin-top: 1px;
+    }
+
+    .pie {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: #a0b0a5;
+    }
+
+    @media (max-width: 400px) {
+      .card { padding: 30px 24px; }
+      .opcion { padding: 16px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="logos">
+      <img src="https://mtmylzxqlbwpcouogvac.supabase.co/storage/v1/object/public/solicitudes-fotos/Logos/LogoTecNM.jpg" alt="TecNM">
+      <div class="divider-logo"></div>
+      <img src="https://mtmylzxqlbwpcouogvac.supabase.co/storage/v1/object/public/solicitudes-fotos/Logos/LogoTec.jpg" alt="ITC">
+    </div>
+
+    <div class="titulo">
+      <h1>Reportar falla de mantenimiento</h1>
+      <p>Departamento de Mantenimiento de Equipo — ITC</p>
+    </div>
+
+    <div class="separador"></div>
+
+    <p class="pregunta">¿Cómo deseas enviar tu reporte?</p>
+
+    <div class="opciones">
+      <a class="opcion opcion-wa" href="https://chat.whatsapp.com/KQTAidZvSAt7v1D0Q84tEj?mode=gi_t" target="_blank">
+        <div class="opcion-icono">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+        </div>
+        <div class="opcion-texto">
+          Reportar por WhatsApp
+          <span>Escríbenos directo al grupo del departamento</span>
+        </div>
+      </a>
+
+      <a class="opcion opcion-web" href="https://mantenimiento-itc.vercel.app" target="_self">
+        <div class="opcion-icono">📋</div>
+        <div class="opcion-texto">
+          Llenar formulario web
+          <span>Registra tu solicitud con todos los detalles</span>
+        </div>
+      </a>
+    </div>
+
+    <p class="pie">Instituto Tecnológico de Celaya · TecNM</p>
+  </div>
+
+</body>
+</html>
