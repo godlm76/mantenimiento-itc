@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta de Solicitud — ITC Celaya</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Open Sans',sans-serif; background:#f0f4f8; min-height:100vh; }
+.header { background:linear-gradient(135deg,#1B396A,#132a50); padding:16px 24px; display:flex; align-items:center; gap:14px; }
+.header-txt h1 { font-family:Montserrat; font-size:16px; font-weight:800; color:white; }
+.header-txt p  { font-size:12px; color:rgba(255,255,255,0.7); margin-top:2px; }
+.container { max-width:600px; margin:30px auto; padding:0 16px 40px; }
+.card { background:white; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.08); padding:24px; margin-bottom:16px; }
+.card-title { font-family:Montserrat; font-weight:800; font-size:15px; color:#1B396A; margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid #e8eef7; }
+.field { display:flex; flex-direction:column; gap:5px; margin-bottom:16px; }
+.field label { font-size:12px; font-weight:700; font-family:Montserrat; color:#1a2340; }
+.field input { padding:12px 14px; border:1.5px solid #d0d8e8; border-radius:9px; font-size:15px; font-family:inherit; text-transform:uppercase; letter-spacing:2px; text-align:center; }
+.field input:focus { outline:none; border-color:#1B396A; }
+.btn-buscar { width:100%; padding:14px; background:#1B396A; color:white; border:none; border-radius:11px; font-family:Montserrat; font-size:15px; font-weight:800; cursor:pointer; }
+.btn-buscar:hover { background:#132a50; }
+.btn-buscar:disabled { background:#aaa; cursor:not-allowed; }
+.result { display:none; }
+.estatus-badge { display:inline-block; padding:6px 16px; border-radius:30px; font-weight:700; font-size:14px; font-family:Montserrat; }
+.dato-row { display:flex; gap:8px; padding:8px 0; border-bottom:1px solid #f0f4f8; font-size:13px; }
+.dato-row:last-child { border-bottom:none; }
+.dato-label { font-weight:700; color:#5a6b80; min-width:140px; }
+.dato-val { color:#1a2340; flex:1; }
+.timeline { margin-top:16px; }
+.tl-item { display:flex; gap:12px; margin-bottom:14px; }
+.tl-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.tl-line { width:2px; background:#e8eef7; margin:16px 0 0 5px; flex-shrink:0; }
+.hint { font-size:11px; color:#5a6b80; margin-top:4px; }
+#error-msg { display:none; background:#fdecea; border-radius:9px; padding:12px 16px; font-size:13px; color:#c0392b; margin-top:12px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-txt">
+    <h1>🔍 Consulta de Solicitud</h1>
+    <p>Recursos Materiales y Servicios — ITC Celaya</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="card-title">Consultar estatus por folio</div>
+    <div class="field">
+      <label>Número de folio</label>
+      <input type="text" id="input-folio" placeholder="VEH-2026-0001"
+        onkeydown="if(event.key==='Enter') buscarSolicitud()"
+        oninput="this.value=this.value.toUpperCase()">
+      <span class="hint">El folio se te proporcionó al enviar tu solicitud</span>
+    </div>
+    <button class="btn-buscar" onclick="buscarSolicitud()" id="btn-buscar">🔍 Consultar</button>
+    <div id="error-msg"></div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="result" id="resultado">
+    <div class="card">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-family:Montserrat;font-weight:700;font-size:13px;color:#5a6b80;margin-bottom:6px">FOLIO</div>
+        <div id="res-folio" style="font-family:Montserrat;font-weight:800;font-size:22px;color:#1B396A;letter-spacing:2px"></div>
+        <div style="margin-top:10px" id="res-estatus-badge"></div>
+      </div>
+
+      <div id="alerta-box" style="display:none;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.6"></div>
+
+      <div class="dato-row"><span class="dato-label">Solicitante</span><span class="dato-val" id="res-nombre"></span></div>
+      <div class="dato-row"><span class="dato-label">Departamento</span><span class="dato-val" id="res-depto"></span></div>
+      <div class="dato-row"><span class="dato-label">Destino</span><span class="dato-val" id="res-destino"></span></div>
+      <div class="dato-row"><span class="dato-label">Propósito</span><span class="dato-val" id="res-proposito"></span></div>
+      <div class="dato-row"><span class="dato-label">Fecha salida</span><span class="dato-val" id="res-fecha-sal"></span></div>
+      <div class="dato-row"><span class="dato-label">Fecha regreso</span><span class="dato-val" id="res-fecha-reg"></span></div>
+      <div class="dato-row"><span class="dato-label">No. personas</span><span class="dato-val" id="res-personas"></span></div>
+      <div class="dato-row" id="row-conductor" style="display:none"><span class="dato-label">Conductor asignado</span><span class="dato-val" id="res-conductor"></span></div>
+      <div class="dato-row" id="row-vehiculo" style="display:none"><span class="dato-label">Vehículo asignado</span><span class="dato-val" id="res-vehiculo"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SURL = 'https://mtmylzxqlbwpcouogvac.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10bXlsenhxbGJ3cGNvdW9ndmFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NTQxOTAsImV4cCI6MjA4NzAzMDE5MH0.u1EEguu4eUT8Uav2-kdCl358Aywp9jI9GcyFvpV-VfI';
+
+const ESTATUS = {
+  'Pendiente':  { bg:'#fff3cd', color:'#856404', icono:'⏳', msg:'Tu solicitud está pendiente de revisión por el jefe de RMS.' },
+  'Aprobada':   { bg:'#e8f5ee', color:'#1a7a3c', icono:'✅', msg:'¡Tu solicitud fue aprobada! Se te ha asignado conductor y vehículo.' },
+  'En curso':   { bg:'#e8eef7', color:'#1B396A', icono:'🔵', msg:'El vehículo está en comisión actualmente.' },
+  'Completada': { bg:'#e8f5ee', color:'#1a7a3c', icono:'✔️', msg:'La comisión fue completada exitosamente.' },
+  'Cancelada':  { bg:'#fdecea', color:'#c0392b', icono:'❌', msg:'Esta solicitud fue cancelada.' },
+};
+
+async function buscarSolicitud() {
+  const folio = document.getElementById('input-folio').value.trim();
+  if (!folio) { mostrarError('Ingresa el número de folio'); return; }
+
+  const btn = document.getElementById('btn-buscar');
+  btn.disabled = true; btn.textContent = '⏳ Buscando...';
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('resultado').style.display = 'none';
+
+  try {
+    const r = await fetch(SURL + '/rest/v1/rms_solicitudes_vehiculo?folio=eq.' + encodeURIComponent(folio) + '&select=*',
+      { headers: { apikey: SKEY, Authorization: 'Bearer ' + SKEY } });
+    const data = await r.json();
+    if (!Array.isArray(data) || !data.length) {
+      mostrarError('No se encontró ninguna solicitud con el folio "' + folio + '". Verifica que esté escrito correctamente.');
+      return;
+    }
+    mostrarResultado(data[0]);
+  } catch(e) {
+    mostrarError('Error al consultar: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Consultar';
+  }
+}
+
+function mostrarError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function mostrarResultado(s) {
+  const est = ESTATUS[s.estatus] || { bg:'#f0f4f8', color:'#5a6b80', icono:'—', msg:'' };
+  const destino = s.tipo_destino === 'nacional'
+    ? [s.localidad_destino, s.municipio_destino, s.estado_destino].filter(Boolean).join(', ')
+    : [s.ciudad_destino, s.pais_destino].filter(Boolean).join(', ');
+
+  document.getElementById('res-folio').textContent    = s.folio || '—';
+  document.getElementById('res-nombre').textContent   = s.nombre_solicitante || '—';
+  document.getElementById('res-depto').textContent    = s.departamento_solicitante || '—';
+  document.getElementById('res-destino').textContent  = destino || '—';
+  document.getElementById('res-proposito').textContent= s.proposito || '—';
+  document.getElementById('res-fecha-sal').textContent= s.fecha_salida ? s.fecha_salida + (s.hora_salida ? ' — ' + s.hora_salida : '') : '—';
+  document.getElementById('res-fecha-reg').textContent= s.fecha_regreso ? s.fecha_regreso + (s.hora_regreso ? ' — ' + s.hora_regreso : '') : '—';
+  document.getElementById('res-personas').textContent = s.num_personas || 1;
+
+  document.getElementById('res-estatus-badge').innerHTML =
+    '<span class="estatus-badge" style="background:' + est.bg + ';color:' + est.color + '">' + est.icono + ' ' + (s.estatus||'—') + '</span>';
+
+  const alerta = document.getElementById('alerta-box');
+  alerta.style.display = 'block';
+  alerta.style.background = est.bg;
+  alerta.style.color = est.color;
+  alerta.textContent = est.msg;
+
+  const rowCond = document.getElementById('row-conductor');
+  const rowVeh  = document.getElementById('row-vehiculo');
+  if (s.conductor_asignado) {
+    document.getElementById('res-conductor').textContent = s.conductor_asignado;
+    rowCond.style.display = 'flex';
+  }
+  if (s.vehiculo_asignado) {
+    document.getElementById('res-vehiculo').textContent = s.vehiculo_asignado;
+    rowVeh.style.display = 'flex';
+  }
+
+  document.getElementById('resultado').style.display = 'block';
+  document.getElementById('resultado').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+// Auto-llenar folio si viene en la URL
+window.addEventListener('DOMContentLoaded', function() {
+  const params = new URLSearchParams(window.location.search);
+  const folioParam = params.get('folio');
+  if (folioParam) {
+    document.getElementById('input-folio').value = folioParam.toUpperCase();
+    buscarSolicitud();
+  }
+});
+
+</script>
+</body>
+</html>
