@@ -761,18 +761,23 @@ async function enviarSolicitud() {
           ? [payload.localidad_destino, payload.municipio_destino, payload.estado_destino].filter(Boolean).join(', ')
           : [payload.ciudad_destino, payload.pais_destino].filter(Boolean).join(', ');
         await emailjs.send('service_w0lj14m', 'template_veh_auth', {
-          to_email:     correo,
-          to_name:      payload.nombre_solicitante,
-          folio:        folio,
-          departamento: payload.departamento_solicitante,
-          vehiculo:     'Por asignar',
-          conductor:    'Por asignar',
-          fecha_salida: payload.fecha_salida,
-          hora_salida:  payload.hora_salida || '',
-          fecha_regreso:payload.fecha_regreso,
-          destino:      destino,
-          proposito:    payload.proposito,
-          estatus:      'Pendiente de revisión — Folio: ' + folio + ' | Consulta: https://mantenimiento-itc.vercel.app/consulta_solicitud.html'
+          asunto:            'Solicitud Recibida — Folio: ' + folio,
+          encabezado:        'Solicitud Recibida',
+          to_email:          correo,
+          to_name:           payload.nombre_solicitante,
+          folio:             folio,
+          departamento:      payload.departamento_solicitante,
+          vehiculo:          'Por asignar',
+          conductor:         'Por asignar',
+          fecha_salida:      payload.fecha_salida,
+          hora_salida:       payload.hora_salida || '',
+          fecha_regreso:     payload.fecha_regreso || '',
+          destino:           destino,
+          proposito:         payload.proposito || '',
+          mensaje_principal: 'su solicitud de vehículo ha sido recibida correctamente y está pendiente de revisión.',
+          mensaje_pie:       'Su solicitud está siendo revisada por el área de RMS. En cuanto sea procesada recibirá otro correo con la respuesta.',
+          liga_consulta:     'https://mantenimiento-itc.vercel.app/consulta_solicitud.html?folio=' + folio
+      });
         });
         const msgEl = document.getElementById('correo-enviado-msg');
         if (msgEl) msgEl.style.display = 'block';
