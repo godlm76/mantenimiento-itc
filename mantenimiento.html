@@ -1501,7 +1501,7 @@
     btn.classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
     if (tab === 'dashboard') renderDashboard();
-    if (tab === 'cronograma') { if(!cronoData.length) inicializarCronograma(esAdmin() || esSubdirector() ? null : 'Mantenimiento de Equipo', esAdmin() || esSubdirector());
+    if (tab === 'cronograma') { if(!cronoData.length) inicializarCronograma(esAdmin() || esSubdirector() ? null : 'Mantenimiento de Equipo', esAdmin() || esSubdirector() || esJefeArea() || (usuarioActual?.rol === 'jefe_depto_mant'));
       // Mostrar/ocultar botones de filtro según rol
       const btnsFiltro = document.getElementById('crono-depto-btns');
       if (btnsFiltro) btnsFiltro.style.display = (esAdmin() || esSubdirector()) ? 'flex' : 'none'; }
@@ -3123,9 +3123,16 @@ function abrirModalActividad(id = null) {
             </select>
           </div>
           <div>
+            <label style="display:block;font-size:12px;font-weight:700;font-family:Montserrat,sans-serif;color:#1a2340;margin-bottom:5px">Año</label>
+            <select id="cm-anio" onchange="actualizarPeriodoModal()" style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:9px;font-size:13px;font-family:inherit">
+              <option value="2025" ${(r?.periodo||"2026").startsWith("2025")?"selected":""}>​2025</option><option value="2026" ${(r?.periodo||"2026").startsWith("2026")?"selected":""}>​2026</option><option value="2027" ${(r?.periodo||"2026").startsWith("2027")?"selected":""}>​2027</option><option value="2028" ${(r?.periodo||"2026").startsWith("2028")?"selected":""}>​2028</option><option value="2029" ${(r?.periodo||"2026").startsWith("2029")?"selected":""}>​2029</option><option value="2030" ${(r?.periodo||"2026").startsWith("2030")?"selected":""}>​2030</option>
+            </select>
+          </div>
+          <div>
             <label style="display:block;font-size:12px;font-weight:700;font-family:Montserrat,sans-serif;color:#1a2340;margin-bottom:5px">Período</label>
-            <input type="text" id="cm-periodo" value="${r?.periodo||'2026-01'}" placeholder="Ej: 2026-01"
-              style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:9px;font-size:13px;font-family:inherit">
+            <select id="cm-periodo-sel" style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:9px;font-size:13px;font-family:inherit">
+              <option value="01" ${(r?.periodo||"").endsWith("-01")?"selected":""}>​Enero — Julio</option><option value="02" ${(r?.periodo||"").endsWith("-02")?"selected":""}>​Agosto — Diciembre</option>
+            </select>
           </div>
         </div>
 
@@ -3243,7 +3250,7 @@ async function guardarActividad() {
     porcentaje_avance:  avVal !== '' ? parseInt(avVal) : null,
     estado:             document.getElementById('cm-estado')?.value || null,
     monto:              parseFloat(document.getElementById('cm-monto')?.value) || null,
-    periodo:            document.getElementById('cm-periodo')?.value || '2026-01',
+    periodo:            (function(){ const a=document.getElementById('cm-anio')?.value||'2026'; const p=document.getElementById('cm-periodo-sel')?.value||'01'; return a+'-'+p; })(),
     notas:              document.getElementById('cm-notas')?.value.trim() || null,
     cantidad:           parseFloat(document.getElementById('cm-cantidad')?.value) || null,
     actualizado_por:    typeof usuarioActual !== 'undefined' ? usuarioActual.nombre : 'Sistema',
@@ -6591,9 +6598,16 @@ function abrirModalActividad(id = null) {
             </select>
           </div>
           <div>
+            <label style="display:block;font-size:12px;font-weight:700;font-family:Montserrat,sans-serif;color:#1a2340;margin-bottom:5px">Año</label>
+            <select id="cm-anio" onchange="actualizarPeriodoModal()" style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:9px;font-size:13px;font-family:inherit">
+              <option value="2025" ${(r?.periodo||"2026").startsWith("2025")?"selected":""}>​2025</option><option value="2026" ${(r?.periodo||"2026").startsWith("2026")?"selected":""}>​2026</option><option value="2027" ${(r?.periodo||"2026").startsWith("2027")?"selected":""}>​2027</option><option value="2028" ${(r?.periodo||"2026").startsWith("2028")?"selected":""}>​2028</option><option value="2029" ${(r?.periodo||"2026").startsWith("2029")?"selected":""}>​2029</option><option value="2030" ${(r?.periodo||"2026").startsWith("2030")?"selected":""}>​2030</option>
+            </select>
+          </div>
+          <div>
             <label style="display:block;font-size:12px;font-weight:700;font-family:Montserrat,sans-serif;color:#1a2340;margin-bottom:5px">Período</label>
-            <input type="text" id="cm-periodo" value="${r?.periodo||'2026-01'}" placeholder="Ej: 2026-01"
-              style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:9px;font-size:13px;font-family:inherit">
+            <select id="cm-periodo-sel" style="width:100%;padding:10px 12px;border:1.5px solid #d0d8e8;border-radius:9px;font-size:13px;font-family:inherit">
+              <option value="01" ${(r?.periodo||"").endsWith("-01")?"selected":""}>​Enero — Julio</option><option value="02" ${(r?.periodo||"").endsWith("-02")?"selected":""}>​Agosto — Diciembre</option>
+            </select>
           </div>
         </div>
 
@@ -6711,7 +6725,7 @@ async function guardarActividad() {
     porcentaje_avance:  avVal !== '' ? parseInt(avVal) : null,
     estado:             document.getElementById('cm-estado')?.value || null,
     monto:              parseFloat(document.getElementById('cm-monto')?.value) || null,
-    periodo:            document.getElementById('cm-periodo')?.value || '2026-01',
+    periodo:            (function(){ const a=document.getElementById('cm-anio')?.value||'2026'; const p=document.getElementById('cm-periodo-sel')?.value||'01'; return a+'-'+p; })(),
     notas:              document.getElementById('cm-notas')?.value.trim() || null,
     cantidad:           parseFloat(document.getElementById('cm-cantidad')?.value) || null,
     actualizado_por:    typeof usuarioActual !== 'undefined' ? usuarioActual.nombre : 'Sistema',
@@ -8389,9 +8403,10 @@ async function cargarDatosDash() {
     if (Array.isArray(data) && typeof actualizarStatsHeader === 'function') actualizarStatsHeader(data);
   } catch(e) { console.warn('cargarDatosDash:', e); }
 }
+
 </script>
 
-
+<script>
 function actualizarPeriodosAnio() {
   const anio = document.getElementById('crono-filtro-anio')?.value || '2026';
   const pSel = document.getElementById('crono-filtro-periodo');
@@ -8445,6 +8460,7 @@ function _mostrarActividadesDonut(estado, acts) {
     row.appendChild(info); row.appendChild(pct); panel.appendChild(row);
   });
 }
+</script>
 
 </body>
 </html>
